@@ -5,18 +5,36 @@ let Entity = require("./entity.js"),
     $ = require("jquery");
 
 let config = {
-    speed: 1000 / 60
+    speed: 1000 / 60,
+    width: 100,
+    height: 100,
+    screenCount: 2
 };
 
-var screen, screenWidth, screenHeight, screenCenter, ctx, $entityList, player;
+let screens = [], screen, screenCenter, $entityList, player;
+
+function addScreens(count) {
+    for (count = 0; count < config.screenCount; count++) {
+        let $screen = $("<canvas>");
+        $screen.css({
+            width: config.width + "px",
+            height: config.height + "px",
+            "background-color": "green"
+        });
+        $screen.attr("width", config.width);
+        $screen.attr("height", config.height);
+        $screen.hide();
+        $("body").prepend($screen);
+        screens.push($screen.get(0));
+    }
+    screen = screens[0];
+}
 
 class Display {
     constructor(customConfig) {
         Object.assign(config, customConfig);
-        screen = document.getElementById("screen");
-        screenWidth = $(screen).css("width").replace("px", "");
-        screenHeight = $(screen).css("height").replace("px", "");
-        screenCenter = 0;
+        addScreens(config.screenCount);
+        screenCenter = [config.width / 2, config.height / 2];
         $entityList = $("#entity-list");
     }
 
@@ -33,38 +51,42 @@ class Display {
     }
 
     render(lastTimestamp) {
+        let oldScreen = screen;
+        screen = screens[(screens.indexOf(screen) + 1) % screens.length];
         let thisTimestamp = Date.now(),
             delta = thisTimestamp - lastTimestamp,
+            ctx = screen.getContext("2d"),
             display = this;
 
         screenCenter = Lib.POINT.subtract(
             Component.POSITION.bindTo(player).getPoint(),
-            [screenWidth / 2, screenHeight / 2]
+            [config.width / 2, config.height / 2]
         );
 
         $entityList.find(":not(.clone)").remove();
-        ctx = screen.getContext("2d");
         ctx.rotate(0);
-        ctx.fillStyle = "#0FF";
-        ctx.fillRect(0, 0, screenWidth, screenHeight);
+        ctx.fillStyle = "#AAA";
+        ctx.fillRect(0, 0, config.width, config.height);
 
         Entity.list.forEach((entity) => {
             if (!entity) {
                 return;
             }
             Display.listEntity(entity);
-            Display.renderEntity(entity);
+            Display.renderEntity(ctx, entity);
         });
 
-        if (player) {
-        }
+        $(screen).show();
+        $(oldScreen).hide();
+
+        Display.rotate(Component.POSITION.bindTo(player).getFacing());
 
         setTimeout(() => {
             display.render(Date.now());
         }, Math.max(0, config.speed - delta));
     }
 
-    static renderEntity(entity) {
+    static renderEntity(ctx, entity) {
         let position = Component.POSITION.bindTo(entity),
             point = position.getPoint(),
             facing = position.getFacing();
@@ -76,10 +98,6 @@ class Display {
         ctx.fillText("^", -2.3, 5);
         ctx.fillRect(0, 0, 1, 1);
         ctx.restore();
-
-        if (entity === player) {
-            Display.rotate(facing);
-        }
     }
 
     static listEntity(entity) {
