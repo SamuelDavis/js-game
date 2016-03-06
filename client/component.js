@@ -43,6 +43,22 @@ class Position extends Component {
     }
 }
 
+class Bounds extends Component {
+    constructor() {
+        super();
+        this.id.push("Bounds")
+    }
+
+    setBounds(bounds) {
+        return this.setData("bounds", bounds);
+    }
+
+    getBounds() {
+        return this.getData("bounds");
+    }
+}
+
 module.exports = {
-    POSITION: new Position()
+    POSITION: new Position(),
+    BOUNDS: new Bounds()
 };

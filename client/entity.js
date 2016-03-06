@@ -52,11 +52,13 @@ class Entity {
 }
 
 class Thing extends Entity {
-    constructor(point, facing) {
+    constructor(point, facing, bounds) {
         point = point || [0, 0];
         facing = facing || 0;
+        bounds = bounds || [10, 10];
         super();
-        Component.POSITION.bindTo(this).setPoint(point).setFacing(facing)
+        Component.POSITION.bindTo(this).setPoint(point).setFacing(facing);
+        Component.BOUNDS.bindTo(this).setBounds(bounds);
     }
 }
 

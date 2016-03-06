@@ -88,14 +88,17 @@ class Display {
 
     static renderEntity(ctx, entity) {
         let position = Component.POSITION.bindTo(entity),
+            bounds = Component.BOUNDS.bindTo(entity).getBounds(),
             point = position.getPoint(),
             facing = position.getFacing();
 
-        ctx.fillStyle = "#000";
         ctx.save();
         ctx.translate(point[0] - screenCenter[0], point[1] - screenCenter[1]);
         ctx.rotate(facing * -1);
-        ctx.fillText("^", -2.3, 5);
+        ctx.fillStyle = "#F00";
+        ctx.fillRect(bounds[0] / 2 * -1, bounds[1] / 2 * -1, bounds[0], bounds[1]);
+        ctx.fillStyle = "#000";
+        Display.renderGlyph(ctx, entity);
         ctx.fillRect(0, 0, 1, 1);
         ctx.restore();
     }
@@ -106,6 +109,16 @@ class Display {
         $item.attr("id", `#entity-${entity.id}`);
         $entityList.append($item);
         $item.removeClass("clone");
+    }
+
+    static renderGlyph(ctx, entity) {
+        switch (entity.constructor) {
+            case Entity.Thing:
+                ctx.fillText("^", -2.6, 5);
+                break;
+            default:
+                ctx.fillText("?", -2.8, 4);
+        }
     }
 }
 
