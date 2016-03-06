@@ -40,14 +40,24 @@ class Input {
                 player.enterState(State.WALK_BACKWARD);
                 break;
             }
-            case inputs.turnLeft:
+            case inputs.strafeRight:
             {
-                player.enterState(State.TURN_LEFT);
+                player.enterState(State.STRAFE_RIGHT);
+                break;
+            }
+            case inputs.strafeLeft:
+            {
+                player.enterState(State.STRAFE_LEFT);
                 break;
             }
             case inputs.turnRight:
             {
                 player.enterState(State.TURN_RIGHT);
+                break;
+            }
+            case inputs.turnLeft:
+            {
+                player.enterState(State.TURN_LEFT);
                 break;
             }
             default:
@@ -67,14 +77,24 @@ class Input {
                 player.exitState(State.WALK_BACKWARD);
                 break;
             }
-            case inputs.turnLeft:
+            case inputs.strafeRight:
             {
-                player.exitState(State.TURN_LEFT);
+                player.exitState(State.STRAFE_RIGHT);
+                break;
+            }
+            case inputs.strafeLeft:
+            {
+                player.exitState(State.STRAFE_LEFT);
                 break;
             }
             case inputs.turnRight:
             {
                 player.exitState(State.TURN_RIGHT);
+                break;
+            }
+            case inputs.turnLeft:
+            {
+                player.exitState(State.TURN_LEFT);
                 break;
             }
             default:

@@ -54,6 +54,29 @@ class Walk extends State {
     }
 }
 
+class Strafe extends State {
+    constructor(dir) {
+        super();
+        this.dir = dir;
+        this.id.push("Strafe");
+        this.id.push((dir > 0) ? "R" : "L");
+    }
+
+    update(game) {
+        super.update(game);
+        let position = Component.POSITION.bindTo(this.entity),
+            facing = position.getFacing() + Math.PI / 2,
+            speed = this.getData("speed") || 1;
+
+        position.move([
+            speed * Math.sin(facing) * this.dir,
+            speed * Math.cos(facing) * this.dir
+        ]);
+
+        return this;
+    }
+}
+
 class Turn extends State {
     constructor(dir) {
         super();
@@ -77,6 +100,8 @@ module.exports = {
     IDLE: new Idle(),
     WALK_FORWARD: new Walk(1),
     WALK_BACKWARD: new Walk(-1),
+    STRAFE_RIGHT: new Strafe(1),
+    STRAFE_LEFT: new Strafe(-1),
     TURN_RIGHT: new Turn(-1),
     TURN_LEFT: new Turn(1)
 };
