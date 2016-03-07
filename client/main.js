@@ -10,7 +10,7 @@ Input.init();
 
 let display = new Display(),
     game = new Game(),
-    player = new Entity.Thing([10, 10], Math.PI, [7.5, 7.5]);
+    player = new Entity.Thing([18, 18], Math.PI, [7.5, 7.5]);
 
 new Entity.Thing([4, 2]);
 

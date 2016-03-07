@@ -57,8 +57,8 @@ class Thing extends Entity {
         facing = facing || 0;
         bounds = bounds || [10, 10];
         super();
-        Component.POSITION.bindTo(this).setPoint(point).setFacing(facing);
-        Component.BOUNDS.bindTo(this).setBounds(bounds);
+        Component.BOUNDS.bindTo(this).init(bounds);
+        Component.POSITION.bindTo(this).init(point, facing);
     }
 }
 

@@ -8,7 +8,8 @@
   "dependencies": {
     "browserify": "*",
     "watchify": "*",
-    "jquery": "*"
+    "jquery": "*",
+    "simple-quadtree": "*"
   },
   "preferGlobal": false,
   "private": true

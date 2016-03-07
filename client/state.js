@@ -1,6 +1,7 @@
 "use strict";
 let EntityFlyweight = require("./entity_flyweight.js"),
-    Component = require("./component.js");
+    Component = require("./component.js"),
+    Lib = require("./lib.js");
 
 class State extends EntityFlyweight {
     constructor() {
@@ -21,6 +22,10 @@ class State extends EntityFlyweight {
     exit() {
         this.setData("exit", new Date());
         return this;
+    }
+
+    getUpdated() {
+        return this.getData("update");
     }
 }
 
@@ -44,6 +49,14 @@ class Walk extends State {
         let position = Component.POSITION.bindTo(this.entity),
             facing = position.getFacing(),
             speed = this.getData("speed") || 1;
+
+        //while (position.getColliding()) {
+        //    let reversedPoint = [
+        //        speed * Math.sin(facing) * this.dir * -1,
+        //        speed * Math.cos(facing) * this.dir * -1
+        //    ];
+        //    position.setPoint(reversedPoint);
+        //}
 
         position.move([
             speed * Math.sin(facing) * this.dir,
