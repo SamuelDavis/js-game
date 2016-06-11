@@ -7,8 +7,7 @@
   },
   "dependencies": {
     "browserify": "*",
-    "watchify": "*",
-    "lodash": "*"
+    "watchify": "*"
   },
   "preferGlobal": false,
   "private": true

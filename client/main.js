@@ -1,26 +1,24 @@
 'use strict';
 
-const InputHandler = require('./services/InputHandler')();
-const Screen = require('./models/Screen')();
-const Actor = require('./models/Actor')();
-const config = require('./config')();
+Math.FloorExponential = n => n.toString().indexOf('e-') !== -1 ? 0 : n;
+Math.trigX = (rads, vel) => Math.FloorExponential(Math.cos(rads) * vel);
+Math.trigY = (rads, vel) => Math.FloorExponential(Math.sin(rads) * vel);
 
-const canvas = document.getElementById('screen');
-const input = new InputHandler();
-const screen = new Screen(canvas);
-const player = new Actor();
-input.handle(canvas, player);
-screen.fitToWindow();
-
-window.addEventListener('resize', () => screen.fitToWindow());
-document.addEventListener('resize', screen.fitToWindow);
+const input = (() => {
+  let cursor = null;
+  let pressed = [];
+  document.onmousemove = evt => cursor = evt;
+  document.onkeydown = e => pressed.includes(e.code) ? null : pressed.push(e.code);
+  document.onkeyup = e => pressed.includes(e.code) ? pressed.splice(pressed.indexOf(e.code), 1) : null;
+  return {
+    calcCursorArc: (x = window.innerWidth / 2, y = window.innerHeight / 2) => cursor ? Math.atan2(cursor.pageY - x, cursor.pageX - y) : null,
+    getPressed: () => pressed
+  };
+})();
 
 const tick = setInterval(() => {
-  player.update();
-  screen
-    .clear()
-    .setOffset(player.position[1], player.position[2])
-    .renderText(JSON.stringify(player, null, 2))
-    .renderSquare(0, canvas.width / 2, canvas.height / 2, 2, 2, config.COLORS.RED)
-    .renderPlayer(player, 10, 10);
+  document.getElementById('output').innerText = JSON.stringify({
+    pressed: input.getPressed(),
+    arc: input.calcCursorArc()
+  }, null, 2);
 }, 10);
