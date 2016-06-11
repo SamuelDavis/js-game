@@ -27,7 +27,7 @@ const INPUT = (() => {
   document.onmousedown = disableEvent(e => pressed.add(mouseButtons[e.which - 1]));
   document.onmouseup = disableEvent(e => pressed.remove(mouseButtons[e.which - 1]));
   return {
-    calcCursorArc: (x = window.innerWidth / 2, y = window.innerHeight / 2) => !cursor ? null : Math.atan2(cursor.pageY - x, cursor.pageX - y),
+    calcCursorAngle: (x = window.innerWidth / 2, y = window.innerHeight / 2) => !cursor ? null : -Math.atan2(cursor.pageX - x, cursor.pageY - y) - Math.PI,
     getCursor: () => !cursor ? null : {
       x: cursor.pageX,
       y: cursor.pageY,
@@ -39,23 +39,41 @@ const INPUT = (() => {
 
 const screen = buildScreen(document.getElementById('screen'));
 const display = buildDisplay(screen, document.getElementById('output'));
+const player = {x: 0, y: 0, a: 0, speed: 2};
+const updateLoop = setInterval(() => {
+  const pressed = INPUT.getPressed();
+  if (pressed.includes('KeyW')) {
+    player.y -= player.speed;
+  }
+  if (pressed.includes('KeyA')) {
+    player.x -= player.speed;
+  }
+  if (pressed.includes('KeyS')) {
+    player.y += player.speed;
+  }
+  if (pressed.includes('KeyD')) {
+    player.x += player.speed;
+  }
+  player.a = INPUT.calcCursorAngle();
+}, 100 / 1000);
 
-const tick = setInterval(() => {
+const renderLoop = setInterval(() => {
   const cursor = INPUT.getCursor();
   display.renderOutput();
+  screen.pan(player.x, player.y);
   screen.clear();
   if (cursor) {
-    screen.pan(cursor.x, cursor.y);
-    screen.renderCircle(cursor.x, cursor.y, Math.max(5, cursor.v));
+    screen.renderCircle(cursor.x + player.x, cursor.y + player.y, Math.max(5, cursor.v), COLORS.WHITE);
   }
+  screen.renderText(window.innerWidth / 2 + player.x, window.innerHeight / 2 + player.y, INPUT.calcCursorAngle(), 'A');
   screen.renderText(window.innerWidth / 2, window.innerHeight / 2, 0, 'The Center', COLORS.RED);
-}, 10);
+}, 60 / 1000);
 
 function buildScreen(canvas) {
   const ctx = canvas.getContext('2d');
-  let offset = {x: 0, y: 0};
+  let offset = {x: 0, y: 0, a: 0};
   return {
-    pan: (x, y) => Object.assign(offset, {x, y}),
+    pan: (x, y, a) => Object.assign(offset, {x, y, a}),
     resize: (width, height) => Object.assign(canvas, {width, height}),
     clear: render.bind(null, () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -64,15 +82,15 @@ function buildScreen(canvas) {
     }),
     renderText: render.bind(null, (x, y, angle, t, c = COLORS.WHITE) => {
       ctx.textBaseline = 'middle';
-      ctx.textAlign = 'right';
+      ctx.textAlign = 'center';
       ctx.fillStyle = c;
-      ctx.translate(x - offset.x + canvas.width / 2, y - offset.y + canvas.height / 2);
+      ctx.translate(x - offset.x, y - offset.y);
       ctx.rotate(angle);
       ctx.fillText(t, 0, 0);
     }),
     renderCircle: render.bind(null, (x, y, radius, c = COLORS.WHITE) => {
       ctx.beginPath();
-      ctx.arc(x - offset.x + canvas.width / 2, y - offset.y + canvas.height / 2, radius, 0, 2 * Math.PI);
+      ctx.arc(x - offset.x, y - offset.y, radius, 0, 2 * Math.PI);
       ctx.strokeStyle = c;
       ctx.stroke();
     })
@@ -95,7 +113,7 @@ function buildDisplay(screen, output) {
       output.style.display = INPUT.getPressed().includes('Tab') ? 'block' : 'none';
       output.innerText = JSON.stringify({
         pressed: INPUT.getPressed(),
-        arc: INPUT.calcCursorArc()
+        arc: INPUT.calcCursorAngle()
       }, null, 2);
     }
   };
