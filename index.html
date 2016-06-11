@@ -3,9 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #output {
+            margin: 0;
+            cursor: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            color: rgba(255, 255, 255, 0.75)
+        }
+
+        #screen {
+            cursor: none;
+        }
+    </style>
 </head>
 <body>
-<div id="output" css="width: 200px; height: 200px;"></div>
+<pre id="output" css="width: 200px; height: 200px;"></pre>
 <canvas id="screen" height="0" width="0"></canvas>
 <script src="client/build/main.js"></script>
 </body>
