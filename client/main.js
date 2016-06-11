@@ -3,6 +3,7 @@
 Math.FloorExponential = n => n.toString().indexOf('e-') !== -1 ? 0 : n;
 Math.trigX = (rads, vel) => Math.FloorExponential(Math.cos(rads) * vel);
 Math.trigY = (rads, vel) => Math.FloorExponential(Math.sin(rads) * vel);
+Math.HalfPI = Math.PI / 2;
 
 Array.prototype.add = function (val) {
   return this.includes(val) ? null : this.push(val);
@@ -27,7 +28,7 @@ const INPUT = (() => {
   document.onmousedown = disableEvent(e => pressed.add(mouseButtons[e.which - 1]));
   document.onmouseup = disableEvent(e => pressed.remove(mouseButtons[e.which - 1]));
   return {
-    calcCursorAngle: (x = window.innerWidth / 2, y = window.innerHeight / 2) => !cursor ? null : -Math.atan2(cursor.pageX - x, cursor.pageY - y) - Math.PI,
+    calcCursorAngle: (x = window.innerWidth / 2, y = window.innerHeight / 2) => !cursor ? null : -Math.atan2(cursor.pageX - x, cursor.pageY - y) + Math.HalfPI,
     getCursor: () => !cursor ? null : {
       x: cursor.pageX,
       y: cursor.pageY,
@@ -40,21 +41,18 @@ const INPUT = (() => {
 const screen = buildScreen(document.getElementById('screen'));
 const display = buildDisplay(screen, document.getElementById('output'));
 const player = {x: 0, y: 0, a: 0, speed: 2};
+
 const updateLoop = setInterval(() => {
   const pressed = INPUT.getPressed();
-  if (pressed.includes('KeyW')) {
-    player.y -= player.speed;
-  }
-  if (pressed.includes('KeyA')) {
-    player.x -= player.speed;
-  }
-  if (pressed.includes('KeyS')) {
-    player.y += player.speed;
-  }
-  if (pressed.includes('KeyD')) {
-    player.x += player.speed;
-  }
   player.a = INPUT.calcCursorAngle();
+  if (pressed.includes('KeyW') || pressed.includes('KeyA')) {
+    player.x += Math.trigX(player.a, player.speed);
+    player.y += Math.trigY(player.a, player.speed);
+  }
+  if (pressed.includes('KeyS') || pressed.includes('KeyD')) {
+    player.x += Math.trigX(player.a, -player.speed);
+    player.y += Math.trigY(player.a, -player.speed);
+  }
 }, 100 / 1000);
 
 const renderLoop = setInterval(() => {
@@ -65,7 +63,7 @@ const renderLoop = setInterval(() => {
   if (cursor) {
     screen.renderCircle(cursor.x + player.x, cursor.y + player.y, Math.max(5, cursor.v), COLORS.WHITE);
   }
-  screen.renderText(window.innerWidth / 2 + player.x, window.innerHeight / 2 + player.y, INPUT.calcCursorAngle(), 'A');
+  screen.renderText(window.innerWidth / 2 + player.x, window.innerHeight / 2 + player.y, INPUT.calcCursorAngle() + Math.HalfPI, 'A');
   screen.renderText(window.innerWidth / 2, window.innerHeight / 2, 0, 'The Center', COLORS.RED);
 }, 60 / 1000);
 
