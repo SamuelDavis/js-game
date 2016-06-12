@@ -87,11 +87,11 @@ setInterval(() => {
   screen.pan(player.x, player.y, player.a);
   screen.clear();
   screen.renderText(window.getHalfWidth(), window.getHalfHeight(), 0, 'The Center', COLORS.RED);
-  screen.renderText(player.x, player.y, Math.HalfPI+player.a, 'A');
-  screen.renderText(100, 100, 0, 'B');
-  screen.renderText(100, 200, 0, 'C');
-  screen.renderText(200, 100, 0, 'D');
-  screen.renderText(200, 200, 0, 'E');
+  screen.renderText(player.x, player.y, Math.HalfPI+player.a, '@');
+  screen.renderText(100, 100, 0, 'A');
+  screen.renderText(100, 200, 0, 'B');
+  screen.renderText(200, 100, 0, 'C');
+  screen.renderText(200, 200, 0, 'D');
 }, 60 / 1000);
 
 function buildScreen(canvas) {
