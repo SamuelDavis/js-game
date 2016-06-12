@@ -28,7 +28,7 @@ const INPUT = (() => {
    * @prop {int} movementX
    * @prop {int} movementY
    */
-  let cursor = null;
+  let cursor = {pageX: window.getHalfWidth(), pageY: window.getHalfHeight(), movementX: 0, movementY: 0};
   let pressed = [];
   window.onblur = e => pressed = [];
   document.onmousemove = overrideEvent(e => cursor = e);
@@ -60,8 +60,11 @@ const INPUT = (() => {
 const screen = buildScreen(document.getElementById('screen'));
 const display = buildDisplay(screen, document.getElementById('output'));
 const player = {x: 0, y: 0, a: 0, speed: 2};
+update();
+render();
 
-setInterval(() => {
+function update() {
+  const startTime = new Date();
   const pressed = INPUT.getPressed();
   player.a = -INPUT.calcCursorAngle(player.x, player.y);
   if (pressed.includes(INPUT.getKeys().WALK_FORWARD)) {
@@ -80,28 +83,27 @@ setInterval(() => {
     player.x += Math.trigX(player.a, player.speed);
     player.y += Math.trigY(player.a, player.speed);
   }
-}, 100 / 1000);
+  setTimeout(update, Math.min(0, 1000 / 100 - (new Date() - startTime)));
+}
 
-setInterval(() => {
+function render() {
+  const startTime = new Date();
   const cursor = INPUT.getCursor();
   display.renderOutput();
   screen.clear();
-  if (cursor) {
-    screen.renderCircle(cursor.x, cursor.y, Math.max(5, cursor.v));
-  }
+  screen.renderCircle(cursor.x, cursor.y, Math.max(5, cursor.v));
   screen.renderText(window.getHalfWidth(), window.getHalfHeight(), 0, 'The Center', COLORS.RED);
   screen.renderText(player.x, player.y, player.a + Math.PI, '^');
   screen.renderText(100, 100, 0, 'A');
   screen.renderText(100, 200, 0, 'B');
   screen.renderText(200, 100, 0, 'C');
   screen.renderText(200, 200, 0, 'D');
-}, 60 / 1000);
+  setTimeout(render, Math.min(0, 1000 / 60 - (new Date() - startTime)));
+}
 
 function buildScreen(canvas) {
   const ctx = canvas.getContext('2d');
-  let offset = {x: 0, y: 0, a: 0};
   return {
-    pan: (x, y, a) => Object.assign(offset, {x, y, a}),
     resize: (width, height) => Object.assign(canvas, {width, height}),
     clear: () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
