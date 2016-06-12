@@ -62,7 +62,7 @@ const player = {x: window.getHalfWidth(), y: window.getHalfHeight(), a: 0, speed
 
 setInterval(() => {
   const pressed = INPUT.getPressed();
-  player.a = INPUT.calcCursorAngle(player.x, player.y);
+  player.a = INPUT.calcCursorAngle();
   if (pressed.includes(INPUT.getKeys().WALK_FORWARD)) {
     player.x += Math.trigX(player.a, -player.speed);
     player.y += Math.trigY(player.a, -player.speed);
@@ -86,8 +86,11 @@ setInterval(() => {
   display.renderOutput();
   screen.pan(player.x, player.y, player.a);
   screen.clear();
+  if (cursor) {
+    screen.renderCircle(cursor.x + player.x, cursor.y + player.y, 5);
+  }
   screen.renderText(window.getHalfWidth(), window.getHalfHeight(), 0, 'The Center', COLORS.RED);
-  screen.renderText(player.x, player.y, Math.HalfPI+player.a, '@');
+  screen.renderText(window.getHalfWidth() + player.x, window.getHalfHeight() + player.y, Math.HalfPI+player.a, '@');
   screen.renderText(100, 100, 0, 'A');
   screen.renderText(100, 200, 0, 'B');
   screen.renderText(200, 100, 0, 'C');
@@ -123,6 +126,7 @@ function buildScreen(canvas) {
 
   function render(cb) {
     ctx.save();
+    ctx.translate(-offset.x, -offset.y);
     cb.apply(null, Array.prototype.slice.call(arguments, 1));
     ctx.restore();
   }
