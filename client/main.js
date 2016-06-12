@@ -23,6 +23,11 @@ const COLORS = {
 
 const INPUT = (() => {
   const mouseButtons = ['MouseLeft', 'MouseMiddle', 'MouseRight'];
+  /**
+   * @type {object}
+   * @prop {int} movementX
+   * @prop {int} movementY
+   */
   let cursor = null;
   let pressed = [];
   document.onmousemove = overrideEvent(e => cursor = e);
@@ -37,7 +42,17 @@ const INPUT = (() => {
       y: cursor.pageY,
       v: (Math.abs(cursor.movementX) + Math.abs(cursor.movementY) / 2)
     },
-    getPressed: () => pressed
+    getPressed: () => pressed,
+    getKeys: () => {
+      return {
+        WALK_FORWARD: 'KeyW',
+        WALK_RIGHT: 'KeyD',
+        WALK_BACKWARD: 'KeyS',
+        WALK_LEFT: 'KeyA',
+        META: 'Meta',
+        SHOW_OUTPUT: 'Tab'
+      }
+    }
   };
 })();
 
@@ -45,28 +60,28 @@ const screen = buildScreen(document.getElementById('screen'));
 const display = buildDisplay(screen, document.getElementById('output'));
 const player = {x: window.getHalfWidth(), y: window.getHalfHeight(), a: 0, speed: 2};
 
-const updateLoop = setInterval(() => {
+setInterval(() => {
   const pressed = INPUT.getPressed();
   player.a = INPUT.calcCursorAngle(player.x, player.y);
-  if (pressed.includes('KeyW')) {
+  if (pressed.includes(INPUT.getKeys().WALK_FORWARD)) {
     player.x += Math.trigX(player.a, -player.speed);
     player.y += Math.trigY(player.a, -player.speed);
   }
-  if (pressed.includes('KeyA')) {
+  if (pressed.includes(INPUT.getKeys().WALK_RIGHT)) {
     player.x += Math.trigX(player.a + Math.HalfPI, player.speed);
     player.y += Math.trigY(player.a + Math.HalfPI, player.speed);
   }
-  if (pressed.includes('KeyS')) {
+  if (pressed.includes(INPUT.getKeys().WALK_BACKWARD)) {
     player.x += Math.trigX(player.a, +player.speed);
     player.y += Math.trigY(player.a, +player.speed);
   }
-  if (pressed.includes('KeyD')) {
+  if (pressed.includes(INPUT.getKeys().WALK_LEFT)) {
     player.x += Math.trigX(player.a + Math.HalfPI, -player.speed);
     player.y += Math.trigY(player.a + Math.HalfPI, -player.speed);
   }
 }, 100 / 1000);
 
-const renderLoop = setInterval(() => {
+setInterval(() => {
   const cursor = INPUT.getCursor();
   display.renderOutput();
   screen.pan(player.x, player.y, player.a);
@@ -119,7 +134,7 @@ function buildDisplay(screen, output) {
   screen.resize(window.innerWidth, window.innerHeight);
   return {
     renderOutput: () => {
-      output.style.display = INPUT.getPressed().includes('Tab') ? 'block' : 'none';
+      output.style.display = INPUT.getPressed().includes(INPUT.getKeys().SHOW_OUTPUT) ? 'block' : 'none';
       output.innerText = JSON.stringify({
         pressed: INPUT.getPressed(),
         arc: INPUT.calcCursorAngle(player.x, player.y),
@@ -130,5 +145,5 @@ function buildDisplay(screen, output) {
 }
 
 function overrideEvent(cb = () => false) {
-  return e => (e.key !== 'Meta') && (e.preventDefault() || cb(e) || false);
+  return e => (e.key !== INPUT.getKeys().META) && (e.preventDefault() || cb(e) || false);
 }
