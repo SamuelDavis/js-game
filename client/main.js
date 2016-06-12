@@ -30,6 +30,7 @@ const INPUT = (() => {
    */
   let cursor = null;
   let pressed = [];
+  window.onblur = e => pressed = [];
   document.onmousemove = overrideEvent(e => cursor = e);
   document.onkeydown = overrideEvent(e => pressed.add(e.code));
   document.onkeyup = overrideEvent(e => pressed.remove(e.code));
