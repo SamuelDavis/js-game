@@ -36,7 +36,7 @@ const INPUT = (() => {
   document.onmousedown = overrideEvent(e => pressed.add(mouseButtons[e.which - 1]));
   document.onmouseup = overrideEvent(e => pressed.remove(mouseButtons[e.which - 1]));
   return {
-    calcCursorAngle: (x = window.getHalfWidth(), y = window.getHalfHeight()) => !cursor ? null : -Math.atan2(cursor.pageX - x, cursor.pageY - y) - Math.HalfPI,
+    calcCursorAngle: (x = window.getHalfWidth(), y = window.getHalfHeight()) => !cursor ? null : Math.atan2(cursor.pageX - x, cursor.pageY - y) - Math.HalfPI,
     getCursor: () => !cursor ? null : {
       x: cursor.pageX,
       y: cursor.pageY,
@@ -62,7 +62,7 @@ const player = {x: window.getHalfWidth(), y: window.getHalfHeight(), a: 0, speed
 
 setInterval(() => {
   const pressed = INPUT.getPressed();
-  player.a = INPUT.calcCursorAngle(player.x, player.y);
+  player.a = INPUT.calcCursorAngle();
   if (pressed.includes(INPUT.getKeys().WALK_FORWARD)) {
     player.x += Math.trigX(player.a, -player.speed);
     player.y += Math.trigY(player.a, -player.speed);
@@ -86,11 +86,12 @@ setInterval(() => {
   display.renderOutput();
   screen.pan(player.x, player.y, player.a);
   screen.clear();
-  if (cursor) {
-    screen.renderCircle(cursor.x, cursor.y, Math.max(3, cursor.v));
-  }
   screen.renderText(window.getHalfWidth(), window.getHalfHeight(), 0, 'The Center', COLORS.RED);
-  screen.renderText(player.x, player.y, player.a - Math.HalfPI, 'A');
+  screen.renderText(0, 0, -player.a - Math.HalfPI, 'A');
+  screen.renderText(100, 100, 0, 'B');
+  screen.renderText(100, 200, 0, 'C');
+  screen.renderText(200, 100, 0, 'D');
+  screen.renderText(200, 200, 0, 'E');
 }, 60 / 1000);
 
 function buildScreen(canvas) {
@@ -122,6 +123,8 @@ function buildScreen(canvas) {
 
   function render(cb) {
     ctx.save();
+    ctx.translate(offset.x, offset.y);
+    ctx.rotate(offset.a);
     cb.apply(null, Array.prototype.slice.call(arguments, 1));
     ctx.restore();
   }
@@ -137,7 +140,7 @@ function buildDisplay(screen, output) {
       output.style.display = INPUT.getPressed().includes(INPUT.getKeys().SHOW_OUTPUT) ? 'block' : 'none';
       output.innerText = JSON.stringify({
         pressed: INPUT.getPressed(),
-        arc: INPUT.calcCursorAngle(player.x, player.y),
+        arc: INPUT.calcCursorAngle(),
         player
       }, null, 2);
     }
