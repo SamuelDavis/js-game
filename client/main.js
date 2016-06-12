@@ -58,7 +58,7 @@ const INPUT = (() => {
 
 const screen = buildScreen(document.getElementById('screen'));
 const display = buildDisplay(screen, document.getElementById('output'));
-const player = {x: window.getHalfWidth(), y: window.getHalfHeight(), a: 0, speed: 2};
+const player = {x: 0, y: 0, a: 0, speed: 2};
 
 setInterval(() => {
   const pressed = INPUT.getPressed();
@@ -126,6 +126,9 @@ function buildScreen(canvas) {
 
   function render(cb) {
     ctx.save();
+    ctx.translate(window.getHalfWidth(), window.getHalfHeight());
+    ctx.rotate(-offset.a);
+    ctx.translate(-window.getHalfWidth(), -window.getHalfHeight());
     ctx.translate(-offset.x, -offset.y);
     cb.apply(null, Array.prototype.slice.call(arguments, 1));
     ctx.restore();
