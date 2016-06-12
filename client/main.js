@@ -25,11 +25,11 @@ const INPUT = (() => {
   const mouseButtons = ['MouseLeft', 'MouseMiddle', 'MouseRight'];
   let cursor = null;
   let pressed = [];
-  document.onmousemove = disableEvent(e => cursor = e);
-  document.onkeydown = disableEvent(e => pressed.add(e.code));
-  document.onkeyup = disableEvent(e => pressed.remove(e.code));
-  document.onmousedown = disableEvent(e => pressed.add(mouseButtons[e.which - 1]));
-  document.onmouseup = disableEvent(e => pressed.remove(mouseButtons[e.which - 1]));
+  document.onmousemove = overrideEvent(e => cursor = e);
+  document.onkeydown = overrideEvent(e => pressed.add(e.code));
+  document.onkeyup = overrideEvent(e => pressed.remove(e.code));
+  document.onmousedown = overrideEvent(e => pressed.add(mouseButtons[e.which - 1]));
+  document.onmouseup = overrideEvent(e => pressed.remove(mouseButtons[e.which - 1]));
   return {
     calcCursorAngle: (x = window.getHalfWidth(), y = window.getHalfHeight()) => !cursor ? null : -Math.atan2(cursor.pageX - x, cursor.pageY - y) - Math.HalfPI,
     getCursor: () => !cursor ? null : {
@@ -113,8 +113,8 @@ function buildScreen(canvas) {
 }
 
 function buildDisplay(screen, output) {
-  document.oncontextmenu = disableEvent();
-  document.onselectstart = disableEvent();
+  document.oncontextmenu = overrideEvent();
+  document.onselectstart = overrideEvent();
   window.onresize = e => screen.resize(window.innerWidth, window.innerHeight);
   screen.resize(window.innerWidth, window.innerHeight);
   return {
@@ -129,6 +129,6 @@ function buildDisplay(screen, output) {
   };
 }
 
-function disableEvent(cb = () => false) {
+function overrideEvent(cb = () => false) {
   return e => (e.key !== 'Meta') && (e.preventDefault() || cb(e) || false);
 }
