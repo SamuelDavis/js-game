@@ -36,7 +36,7 @@ const INPUT = (() => {
   document.onmousedown = overrideEvent(e => pressed.add(mouseButtons[e.which - 1]));
   document.onmouseup = overrideEvent(e => pressed.remove(mouseButtons[e.which - 1]));
   return {
-    calcCursorAngle: (x = window.getHalfWidth(), y = window.getHalfHeight()) => !cursor ? null : -Math.atan2(cursor.pageX - x, cursor.pageY - y) - Math.HalfPI,
+    calcCursorAngle: (x = window.getHalfWidth(), y = window.getHalfHeight()) => !cursor ? null : Math.atan2(cursor.pageX - x, cursor.pageY - y),
     getCursor: () => !cursor ? null : {
       x: cursor.pageX,
       y: cursor.pageY,
@@ -64,33 +64,29 @@ setInterval(() => {
   const pressed = INPUT.getPressed();
   player.a = INPUT.calcCursorAngle();
   if (pressed.includes(INPUT.getKeys().WALK_FORWARD)) {
-    player.x += Math.trigX(player.a, -player.speed);
-    player.y += Math.trigY(player.a, -player.speed);
-  }
-  if (pressed.includes(INPUT.getKeys().WALK_RIGHT)) {
-    player.x += Math.trigX(player.a - Math.HalfPI, player.speed);
-    player.y += Math.trigY(player.a - Math.HalfPI, player.speed);
-  }
-  if (pressed.includes(INPUT.getKeys().WALK_BACKWARD)) {
     player.x += Math.trigX(player.a, player.speed);
     player.y += Math.trigY(player.a, player.speed);
   }
-  if (pressed.includes(INPUT.getKeys().WALK_LEFT)) {
+  if (pressed.includes(INPUT.getKeys().WALK_RIGHT)) {
     player.x += Math.trigX(player.a - Math.HalfPI, -player.speed);
     player.y += Math.trigY(player.a - Math.HalfPI, -player.speed);
+  }
+  if (pressed.includes(INPUT.getKeys().WALK_BACKWARD)) {
+    player.x += Math.trigX(player.a, -player.speed);
+    player.y += Math.trigY(player.a, -player.speed);
+  }
+  if (pressed.includes(INPUT.getKeys().WALK_LEFT)) {
+    player.x += Math.trigX(player.a - Math.HalfPI, player.speed);
+    player.y += Math.trigY(player.a - Math.HalfPI, player.speed);
   }
 }, 100 / 1000);
 
 setInterval(() => {
-  const cursor = INPUT.getCursor();
   display.renderOutput();
   screen.pan(player.x, player.y, player.a);
   screen.clear();
-  if (cursor) {
-    screen.renderCircle(cursor.x + player.x, cursor.y + player.y, 5);
-  }
   screen.renderText(window.getHalfWidth(), window.getHalfHeight(), 0, 'The Center', COLORS.RED);
-  screen.renderText(window.getHalfWidth() + player.x, window.getHalfHeight() + player.y, Math.HalfPI+player.a, '@');
+  screen.renderText(window.getHalfWidth() + player.x, window.getHalfHeight() + player.y, player.a, '>');
   screen.renderText(100, 100, 0, 'A');
   screen.renderText(100, 200, 0, 'B');
   screen.renderText(200, 100, 0, 'C');
@@ -99,9 +95,9 @@ setInterval(() => {
 
 function buildScreen(canvas) {
   const ctx = canvas.getContext('2d');
-  let offset = {x: 0, y: 0, a: Math.HalfPI};
+  let offset = {x: 0, y: 0, a: 0};
   return {
-    pan: (x, y, a) => Object.assign(offset, {x, y, a: a - Math.HalfPI}),
+    pan: (x, y, a) => Object.assign(offset, {x, y, a}),
     resize: (width, height) => Object.assign(canvas, {width, height}),
     clear: () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -145,7 +141,7 @@ function buildDisplay(screen, output) {
       output.style.display = INPUT.getPressed().includes(INPUT.getKeys().SHOW_OUTPUT) ? 'block' : 'none';
       output.innerText = JSON.stringify({
         pressed: INPUT.getPressed(),
-        arc: INPUT.calcCursorAngle(player.x, player.y),
+        arc: INPUT.calcCursorAngle(),
         player
       }, null, 2);
     }
