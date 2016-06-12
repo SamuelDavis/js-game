@@ -63,31 +63,34 @@ const player = {x: 0, y: 0, a: 0, speed: 2};
 
 setInterval(() => {
   const pressed = INPUT.getPressed();
-  player.a = INPUT.calcCursorAngle();
+  player.a = -INPUT.calcCursorAngle(player.x, player.y);
   if (pressed.includes(INPUT.getKeys().WALK_FORWARD)) {
-    player.x += Math.trigX(player.a, player.speed);
-    player.y += Math.trigY(player.a, player.speed);
-  }
-  if (pressed.includes(INPUT.getKeys().WALK_RIGHT)) {
     player.x += Math.trigX(player.a - Math.HalfPI, -player.speed);
     player.y += Math.trigY(player.a - Math.HalfPI, -player.speed);
   }
-  if (pressed.includes(INPUT.getKeys().WALK_BACKWARD)) {
+  if (pressed.includes(INPUT.getKeys().WALK_RIGHT)) {
     player.x += Math.trigX(player.a, -player.speed);
     player.y += Math.trigY(player.a, -player.speed);
   }
-  if (pressed.includes(INPUT.getKeys().WALK_LEFT)) {
+  if (pressed.includes(INPUT.getKeys().WALK_BACKWARD)) {
     player.x += Math.trigX(player.a - Math.HalfPI, player.speed);
     player.y += Math.trigY(player.a - Math.HalfPI, player.speed);
+  }
+  if (pressed.includes(INPUT.getKeys().WALK_LEFT)) {
+    player.x += Math.trigX(player.a, player.speed);
+    player.y += Math.trigY(player.a, player.speed);
   }
 }, 100 / 1000);
 
 setInterval(() => {
+  const cursor = INPUT.getCursor();
   display.renderOutput();
-  screen.pan(player.x, player.y, player.a);
   screen.clear();
+  if (cursor) {
+    screen.renderCircle(cursor.x, cursor.y, Math.max(5, cursor.v));
+  }
   screen.renderText(window.getHalfWidth(), window.getHalfHeight(), 0, 'The Center', COLORS.RED);
-  screen.renderText(window.getHalfWidth() + player.x, window.getHalfHeight() + player.y, player.a, '>');
+  screen.renderText(player.x, player.y, player.a + Math.PI, '^');
   screen.renderText(100, 100, 0, 'A');
   screen.renderText(100, 200, 0, 'B');
   screen.renderText(200, 100, 0, 'C');
@@ -123,10 +126,6 @@ function buildScreen(canvas) {
 
   function render(cb) {
     ctx.save();
-    ctx.translate(window.getHalfWidth(), window.getHalfHeight());
-    ctx.rotate(-offset.a);
-    ctx.translate(-window.getHalfWidth(), -window.getHalfHeight());
-    ctx.translate(-offset.x, -offset.y);
     cb.apply(null, Array.prototype.slice.call(arguments, 1));
     ctx.restore();
   }
@@ -143,6 +142,7 @@ function buildDisplay(screen, output) {
       output.innerText = JSON.stringify({
         pressed: INPUT.getPressed(),
         arc: INPUT.calcCursorAngle(),
+        cursor: INPUT.getCursor(),
         player
       }, null, 2);
     }
