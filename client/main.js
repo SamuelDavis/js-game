@@ -1,8 +1,9 @@
 'use strict';
 
 Math.FloorExponential = n => n.toString().indexOf('e-') !== -1 ? 0 : n;
-Math.trigX = (rads, vel) => Math.FloorExponential(Math.cos(rads) * vel);
-Math.trigY = (rads, vel) => Math.FloorExponential(Math.sin(rads) * vel);
+Math.TrigX = (rads, vel) => Math.FloorExponential(Math.cos(rads) * vel);
+Math.TrigY = (rads, vel) => Math.FloorExponential(Math.sin(rads) * vel);
+Math.TrigAngleBetween = (x1, y1, x2, y2) => Math.atan2(x2 - x1, y2 - y1)
 Math.HalfPI = Math.PI / 2;
 
 Array.prototype.add = function (val) {
@@ -18,7 +19,8 @@ window.getHalfHeight = () => window.innerHeight / 2;
 const COLORS = {
   BLACK: '#000000',
   WHITE: '#ffffff',
-  RED: '#ff0000'
+  RED: '#ff0000',
+  GREEN: '#347C2C'
 };
 
 const INPUT = (() => {
@@ -37,7 +39,7 @@ const INPUT = (() => {
   document.onmousedown = overrideEvent(e => pressed.add(mouseButtons[e.which - 1]));
   document.onmouseup = overrideEvent(e => pressed.remove(mouseButtons[e.which - 1]));
   return {
-    calcCursorAngle: (x = window.getHalfWidth(), y = window.getHalfHeight()) => !cursor ? null : Math.atan2(cursor.pageX - x, cursor.pageY - y),
+    calcCursorAngle: (x = window.getHalfWidth(), y = window.getHalfHeight()) => !cursor ? null : Math.TrigAngleBetween(x, y, cursor.pageX, cursor.pageY),
     getCursor: () => !cursor ? null : {
       x: cursor.pageX,
       y: cursor.pageY,
@@ -59,7 +61,11 @@ const INPUT = (() => {
 
 const screen = buildScreen(document.getElementById('screen'));
 const display = buildDisplay(screen, document.getElementById('output'));
-const player = {x: 0, y: 0, a: 0, speed: 2};
+const player = buildActor({speed: 3});
+const actors = [];
+for (let i = 0; i < 5; i++) {
+  actors.push(buildActor({x: Math.random() * 100 + 1, y: Math.random() * 100 + 1, speed: Math.random() * 2 + 1}))
+}
 update();
 render();
 
@@ -68,21 +74,21 @@ function update() {
   const pressed = INPUT.getPressed();
   player.a = -INPUT.calcCursorAngle(player.x, player.y);
   if (pressed.includes(INPUT.getKeys().WALK_FORWARD)) {
-    player.x += Math.trigX(player.a - Math.HalfPI, -player.speed);
-    player.y += Math.trigY(player.a - Math.HalfPI, -player.speed);
+    player.moveForward();
   }
   if (pressed.includes(INPUT.getKeys().WALK_RIGHT)) {
-    player.x += Math.trigX(player.a, -player.speed);
-    player.y += Math.trigY(player.a, -player.speed);
+    player.moveRight();
   }
   if (pressed.includes(INPUT.getKeys().WALK_BACKWARD)) {
-    player.x += Math.trigX(player.a - Math.HalfPI, player.speed);
-    player.y += Math.trigY(player.a - Math.HalfPI, player.speed);
+    player.moveBackward();
   }
   if (pressed.includes(INPUT.getKeys().WALK_LEFT)) {
-    player.x += Math.trigX(player.a, player.speed);
-    player.y += Math.trigY(player.a, player.speed);
+    player.moveLeft();
   }
+  actors.forEach(actor => {
+    actor.a = -Math.TrigAngleBetween(actor.x, actor.y, player.x, player.y);
+    actor.moveForward();
+  });
   setTimeout(update, Math.min(0, 1000 / 100 - (new Date() - startTime)));
 }
 
@@ -98,6 +104,7 @@ function render() {
   screen.renderText(100, 200, 0, 'B');
   screen.renderText(200, 100, 0, 'C');
   screen.renderText(200, 200, 0, 'D');
+  actors.forEach(actor => screen.renderText(actor.x, actor.y, actor.a + Math.PI, '^', COLORS.GREEN));
   setTimeout(render, Math.min(0, 1000 / 60 - (new Date() - startTime)));
 }
 
@@ -153,4 +160,28 @@ function buildDisplay(screen, output) {
 
 function overrideEvent(cb = () => false) {
   return e => (e.key !== INPUT.getKeys().META) && (e.preventDefault() || cb(e) || false);
+}
+
+function buildActor(attributes) {
+  const actor = Object.assign({x: 0, y: 0, a: 0, speed: 1}, attributes);
+  const actions = {
+    moveForward: () => {
+      actor.x += Math.TrigX(actor.a - Math.HalfPI, -actor.speed);
+      actor.y += Math.TrigY(actor.a - Math.HalfPI, -actor.speed);
+    },
+    moveRight: () => {
+      actor.x += Math.TrigX(actor.a, -actor.speed);
+      actor.y += Math.TrigY(actor.a, -actor.speed);
+    },
+    moveBackward: () => {
+      actor.x += Math.TrigX(actor.a - Math.HalfPI, actor.speed);
+      actor.y += Math.TrigY(actor.a - Math.HalfPI, actor.speed);
+    },
+    moveLeft: () => {
+      actor.x += Math.TrigX(actor.a, actor.speed);
+      actor.y += Math.TrigY(actor.a, actor.speed);
+    }
+  };
+
+  return Object.assign(actor, actions);
 }
