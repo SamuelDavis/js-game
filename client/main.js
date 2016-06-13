@@ -3,7 +3,8 @@
 Math.FloorExponential = n => n.toString().indexOf('e-') !== -1 ? 0 : n;
 Math.TrigX = (rads, vel) => Math.FloorExponential(Math.cos(rads) * vel);
 Math.TrigY = (rads, vel) => Math.FloorExponential(Math.sin(rads) * vel);
-Math.TrigAngleBetween = (x1, y1, x2, y2) => Math.atan2(x2 - x1, y2 - y1)
+Math.TrigDistBetween = (x1, y1, x2, y2) => Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+Math.TrigAngleBetween = (x1, y1, x2, y2) => Math.atan2(x2 - x1, y2 - y1);
 Math.HalfPI = Math.PI / 2;
 
 Array.prototype.add = function (val) {
@@ -88,6 +89,9 @@ function update() {
   actors.forEach(actor => {
     actor.a = -Math.TrigAngleBetween(actor.x, actor.y, player.x, player.y);
     actor.moveForward();
+  });
+  actors.concat(player).forEach(actor => {
+    actors.concat(player).forEach(resolveActorCollision.bind(null, actor));
   });
   setTimeout(update, Math.min(0, 1000 / 100 - (new Date() - startTime)));
 }
@@ -184,4 +188,13 @@ function buildActor(attributes) {
   };
 
   return Object.assign(actor, actions);
+}
+
+function resolveActorCollision(actor, check) {
+  const origA = actor.a;
+  while (actor !== check && Math.TrigDistBetween(actor.x, actor.y, check.x, check.y) < 5) {
+    actor.a = -Math.TrigAngleBetween(actor.x, actor.y, check.x, check.y);
+    actor.moveBackward();
+  }
+  actor.a = origA;
 }
