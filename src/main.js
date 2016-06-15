@@ -1,5 +1,19 @@
 'use strict';
 
+Object.prototype.forOwn = function (cb) {
+  let key;
+  for (key in this) {
+    if (this.hasOwnProperty(key) && cb(key, this[key], this) === false) {
+      break;
+    }
+  }
+  return this;
+};
+
+Object.prototype.keysToValues = function () {
+  return this.forOwn((key, val, obj) => obj[key] = key);
+};
+
 Math.FloorExponential = n => n.toString().indexOf('e-') !== -1 ? 0 : n;
 Math.TrigX = (rads, vel) => Math.FloorExponential(Math.cos(rads) * vel);
 Math.TrigY = (rads, vel) => Math.FloorExponential(Math.sin(rads) * vel);
@@ -23,7 +37,12 @@ const app = require('./app');
 const player = app.buildActor({speed: 3});
 const actors = [];
 for (let i = 0; i < 5; i++) {
-  actors.push(app.buildActor({x: Math.random() * 100 + 1, y: Math.random() * 100 + 1, speed: Math.random() * 2 + 1}))
+  actors.push(app.buildActor({
+    x: Math.random() * 100 + 1,
+    y: Math.random() * 100 + 1,
+    speed: Math.random() * 2 + 1,
+    states: [app.ACTOR_STATES.WALK_FORWARD]
+  }));
 }
 
 ui.INPUT.overrideEvents();

@@ -2,33 +2,37 @@
 
 const ui = require('./ui');
 
+const ACTOR_STATES = {
+  WALK_FORWARD: null,
+  WALK_RIGHT: null,
+  WALK_BACKWARD: null,
+  WALK_LEFT: null
+}.keysToValues();
+
 module.exports = {
   update,
   buildActor,
-  resolveActorCollision
+  resolveActorCollision,
+  ACTOR_STATES
 };
 
 function update(player, actors = []) {
   const startTime = new Date();
   const pressed = ui.INPUT.getPressed();
+  const keys = ui.INPUT.getKeys();
   player.a = -ui.INPUT.calcCursorAngle(player.x, player.y);
-  if (pressed.includes(ui.INPUT.getKeys().WALK_FORWARD)) {
-    player.moveForward();
-  }
-  if (pressed.includes(ui.INPUT.getKeys().WALK_RIGHT)) {
-    player.moveRight();
-  }
-  if (pressed.includes(ui.INPUT.getKeys().WALK_BACKWARD)) {
-    player.moveBackward();
-  }
-  if (pressed.includes(ui.INPUT.getKeys().WALK_LEFT)) {
-    player.moveLeft();
-  }
+  keys.forOwn((key, val) => {
+    if (ACTOR_STATES.hasOwnProperty(key) && pressed.includes(val)) {
+      player.states.add(key)
+    } else {
+      player.states.remove(key);
+    }
+  });
   actors.forEach(actor => {
     actor.a = -Math.TrigAngleBetween(actor.x, actor.y, player.x, player.y);
-    actor.moveForward();
   });
   actors.concat(player).forEach(actor => {
+    actor.update();
     actors.concat(player).forEach(resolveActorCollision.bind(null, actor));
   });
   setTimeout(update.bind(this, player, actors), Math.min(0, 1000 / 100 - (new Date() - startTime)));
@@ -36,7 +40,7 @@ function update(player, actors = []) {
 
 
 function buildActor(attributes) {
-  const actor = Object.assign({x: 0, y: 0, a: 0, speed: 1}, attributes);
+  const actor = Object.assign({x: 0, y: 0, a: 0, speed: 1, states: []}, attributes);
   const actions = {
     moveForward: () => {
       actor.x += Math.TrigX(actor.a - Math.HalfPI, -actor.speed);
@@ -56,7 +60,22 @@ function buildActor(attributes) {
     }
   };
 
-  return Object.assign(actor, actions);
+  return Object.assign(actor, actions, {
+    update: () => {
+      if (actor.states.includes(ACTOR_STATES.WALK_FORWARD)) {
+        actor.moveForward();
+      }
+      if (actor.states.includes(ACTOR_STATES.WALK_RIGHT)) {
+        actor.moveRight();
+      }
+      if (actor.states.includes(ACTOR_STATES.WALK_BACKWARD)) {
+        actor.moveBackward();
+      }
+      if (actor.states.includes(ACTOR_STATES.WALK_LEFT)) {
+        actor.moveLeft();
+      }
+    }
+  });
 }
 
 function resolveActorCollision(actor, check) {
