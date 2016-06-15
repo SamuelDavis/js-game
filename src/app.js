@@ -22,11 +22,7 @@ function update(player, actors = []) {
   const keys = ui.INPUT.getKeys();
   player.a = -ui.INPUT.calcCursorAngle(player.x, player.y);
   keys.forOwn((key, val) => {
-    if (ACTOR_STATES.hasOwnProperty(key) && pressed.includes(val)) {
-      player.states.add(key)
-    } else {
-      player.states.remove(key);
-    }
+    ACTOR_STATES.hasOwnProperty(key) && pressed.includes(val) ? player.states.add(key) : player.states.remove(key);
   });
   actors.forEach(actor => {
     actor.a = -Math.TrigAngleBetween(actor.x, actor.y, player.x, player.y);
