@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "author": "Samuel Davis <samueljakdavis@gmail.com>",
   "scripts": {
-    "watch": "node_modules/.bin/watchify client/main.js -o client/build/main.js --debug"
+    "watch": "node_modules/.bin/watchify src/main.js -o build/main.js --debug"
   },
   "dependencies": {
     "browserify": "*",
