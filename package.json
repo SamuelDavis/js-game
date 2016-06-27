@@ -1,0 +1,14 @@
+{
+  "name": "game",
+  "version": "0.1.0",
+  "author": "Samuel Davis <samueljakdavis@gmail.com>",
+  "scripts": {
+    "watch": "node_modules/.bin/watchify src/main.js -o build/main.js --debug"
+  },
+  "dependencies": {
+    "browserify": "*",
+    "watchify": "*"
+  },
+  "preferGlobal": false,
+  "private": true
+}
