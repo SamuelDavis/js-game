@@ -1,54 +1,68 @@
 'use strict';
 
-const {Loop, Point, Rectangle, Circle, Collection} = require('./jsExtensions');
-const Output = require('./output');
+const createjs = require('createjs-collection');
 
-class Zone {
-  constructor() {
-    this.area = new Rectangle();
-    this.terrain = new Collection();
-    this.actors = new Collection();
-  }
+Math.FloorExponential = n => n.toString().indexOf('e-') !== -1 ? 0 : n;
+Math.TrigX = (rads, vel) => Math.FloorExponential(Math.cos(rads) * vel);
+Math.TrigY = (rads, vel) => Math.FloorExponential(Math.sin(rads) * vel);
+Math.TrigAngleBetween = (x1, y1, x2, y2) => Math.atan2(x2 - x1, y2 - y1);
+Math.HalfPI = Math.PI / 2;
 
-  /**
-   * @param {Rectangle || Circle} terrain
-   * @returns {Zone}
-   */
-  addTerrian(terrain) {
-    this.area
-      .expandToContain(terrain.topLeft)
-      .expandToContain(terrain.bottomRight);
-    this.terrain.add(terrain);
-    return this;
-  }
+let code = null;
+let cursor = {pageX: 0, pageY: 0};
+const screen = document.getElementById('screen');
+window.onresize = e => {
+  screen.width = window.innerWidth - 5;
+  screen.height = window.innerHeight - 5;
+};
+window.onresize();
+const stage = new createjs.Stage(screen);
+window.onmousemove = e => {
+  cursor = e;
+  code = null;
 }
 
-const output = (new Output(document.getElementById('screen'))).resize(window.innerWidth, window.innerHeight);
-const world = new Collection();
+const circle = new createjs.Shape();
+circle.graphics
+  .beginFill("DeepSkyBlue")
+  .drawCircle(0, 0, 50);
+circle.x = 100;
+circle.y = 100;
+stage.addChild(circle);
 
-world
-  .add(
-    (new Zone)
-      .addTerrian(new Rectangle(new Point(10, 10), new Point(30, 25)))
-      .addTerrian(new Rectangle(new Point(30, 20), new Point(35, 45)))
-      .addTerrian(new Circle(new Point(75, 25), 20))
-  )
-  .add(
-    (new Zone)
-      .addTerrian(new Rectangle(new Point(125, 175), new Point(130, 180)))
-      .addTerrian(new Circle(new Point(135, 150), 5))
-  );
+createjs.Ticker.setFPS(60);
+createjs.Ticker.addEventListener("tick", stage);
 
-const render = (new Loop(1000 / 60, () => {
-  world.forEach(zone => {
-    output.clear(zone.area);
-    zone.terrain.forEach(terrain => {
-      if (terrain instanceof Circle) {
-        output.renderCircle(terrain);
-      } else if (terrain instanceof Rectangle) {
-        output.renderRectangle(terrain);
-      }
-    });
-  });
-}))
-  .start();
+document.onkeydown = e => {
+  if (code === e.code) {
+    return;
+  }
+  code = e.code;
+  const dest = {x: circle.x, y: circle.y};
+  switch (code) {
+    case 'KeyW':
+      dest.x += Math.TrigX(-calcCursorAngle(circle.x, circle.y) - Math.HalfPI, -1);
+      dest.y += Math.TrigY(-calcCursorAngle(circle.x, circle.y) - Math.HalfPI, -1);
+      break;
+    case 'KeyA':
+      dest.x += Math.TrigX(-calcCursorAngle(circle.x, circle.y), 1);
+      dest.y += Math.TrigY(-calcCursorAngle(circle.x, circle.y), 1);
+      break;
+    case 'KeyS':
+      dest.x += Math.TrigX(-calcCursorAngle(circle.x, circle.y) - Math.HalfPI, 1);
+      dest.y += Math.TrigY(-calcCursorAngle(circle.x, circle.y) - Math.HalfPI, 1);
+      break;
+    case 'KeyD':
+      dest.x += Math.TrigX(-calcCursorAngle(circle.x, circle.y), -1);
+      dest.y += Math.TrigY(-calcCursorAngle(circle.x, circle.y), -1);
+      break;
+  }
+  createjs.Tween.get(circle, {override: true}).to({
+    x: cursor.pageX,
+    y: cursor.pageY
+  }, 1000);
+};
+
+function calcCursorAngle(x, y) {
+  return Math.TrigAngleBetween(x, y, cursor.pageX, cursor.pageY);
+}
