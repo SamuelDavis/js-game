@@ -1,13 +1,11 @@
 'use strict';
 
-const {Rectangle, Circle} = require('./jsExtensions');
-const COLORS = {
-  BLACK: '#000000',
-  RED: '#FF0000',
-  GREEN: '#00FF00'
+const {Entity, Sheep} = require('./Entities');
+const GLYPHS = {
+  [Sheep.constructor.name]: 'S'
 };
 
-module.exports = class Output {
+class Output {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -19,49 +17,38 @@ module.exports = class Output {
     return this;
   }
 
-  /**
-   * @param {Rectangle} rect
-   * @returns {Output}
-   */
-  clear(rect) {
-    return this.draw(() => {
-      this.ctx.clearRect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
-      this.ctx.fillStyle = COLORS.BLACK;
-      this.ctx.fillRect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
-      return this;
+  clear() {
+    return render.call(this, () => {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.fillStyle = this.COLORS.BLACK;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     });
   }
 
   /**
-   * @param {Circle} circle
-   * @returns {Output}
+   * @param {Entity} entity
    */
-  renderCircle(circle) {
-    return this.draw(() => {
-      this.ctx.fillStyle = COLORS.RED;
-      this.ctx.beginPath();
-      this.ctx.arc(circle.center.x, circle.center.y, circle.radius, 0, 2 * Math.PI, false);
-      this.ctx.fill();
-      return this;
-    })
+  renderEntity(entity) {
+    return render.call(this, drawGlyph.bind(this, this.ctx, entity));
   }
+}
 
-  /**
-   * @param {Rectangle} rect
-   * @returns {Output}
-   */
-  renderRectangle(rect) {
-    return this.draw(() => {
-      this.ctx.fillStyle = COLORS.GREEN;
-      this.ctx.fillRect(rect.topLeft.x, rect.topLeft.y, rect.width, rect.height);
-      return this;
-    })
-  }
-
-  draw(cb) {
-    this.ctx.save();
-    const ret = cb();
-    this.ctx.restore();
-    return ret;
-  }
+Output.prototype.COLORS = {
+  BLACK: '#000000'
 };
+
+module.exports = Output;
+
+function render(cb) {
+  this.ctx.save();
+  cb();
+  this.ctx.restore();
+  return this;
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Entity} entity
+ */
+function drawGlyph(ctx, entity) {
+}

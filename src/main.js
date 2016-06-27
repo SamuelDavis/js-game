@@ -1,54 +1,22 @@
 'use strict';
 
-const {Loop, Point, Rectangle, Circle, Collection} = require('./jsExtensions');
+require('./jsExtensions');
 const Output = require('./output');
+const {Loop, overrideEvent} = require('./utils');
+const {Sheep} = require('./Entities');
 
-class Zone {
-  constructor() {
-    this.area = new Rectangle();
-    this.terrain = new Collection();
-    this.actors = new Collection();
-  }
+const output = new Output(document.getElementById('screen')).resize(window.innerWidth, window.innerHeight);
+window.onresize = overrideEvent(output.resize.bind(output, window.innerWidth, window.innerHeight));
 
-  /**
-   * @param {Rectangle || Circle} terrain
-   * @returns {Zone}
-   */
-  addTerrian(terrain) {
-    this.area
-      .expandToContain(terrain.topLeft)
-      .expandToContain(terrain.bottomRight);
-    this.terrain.add(terrain);
-    return this;
-  }
-}
+const actors = [
+  new Sheep()
+];
 
-const output = (new Output(document.getElementById('screen'))).resize(window.innerWidth, window.innerHeight);
-const world = new Collection();
+const update = new Loop(100 / 1000, () => {
+  actors.forEach(actor => actor.states.forOwn(state => state.update()));
+}).start();
 
-world
-  .add(
-    (new Zone)
-      .addTerrian(new Rectangle(new Point(10, 10), new Point(30, 25)))
-      .addTerrian(new Rectangle(new Point(30, 20), new Point(35, 45)))
-      .addTerrian(new Circle(new Point(75, 25), 20))
-  )
-  .add(
-    (new Zone)
-      .addTerrian(new Rectangle(new Point(125, 175), new Point(130, 180)))
-      .addTerrian(new Circle(new Point(135, 150), 5))
-  );
-
-const render = (new Loop(1000 / 60, () => {
-  world.forEach(zone => {
-    output.clear(zone.area);
-    zone.terrain.forEach(terrain => {
-      if (terrain instanceof Circle) {
-        output.renderCircle(terrain);
-      } else if (terrain instanceof Rectangle) {
-        output.renderRectangle(terrain);
-      }
-    });
-  });
-}))
-  .start();
+const render = new Loop(60 / 1000, () => {
+  output.clear();
+  actors.forEach(output.render.bind(output));
+}).start();
