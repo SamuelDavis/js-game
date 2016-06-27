@@ -8,8 +8,20 @@ class Loop {
   }
 
   start() {
-    this.interval = setInterval(this.cb, this.timeout);
+    if (!this.interval) {
+      this.interval = setInterval(this.cb, this.timeout);
+    }
     return this;
+  }
+
+  stop() {
+    clearInterval(this.interval);
+    this.interval = null;
+    return this;
+  }
+
+  isRunning() {
+    return Boolean(this.interval);
   }
 }
 

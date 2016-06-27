@@ -10,10 +10,20 @@ class Component {
 
   /**
    * @param {Entity} entity
+   * @param {Object} data
+   * @returns {Component}
+   */
+  setData(entity, data) {
+    entity.data[this.class] = Object.assign({}, entity.data[this.class], data);
+    return this;
+  }
+
+  /**
+   * @param {Entity} entity
    * @returns {Component}
    */
   init(entity) {
-    entity.data[this.class] = Object.assign({}, this.defaultData, entity.data[this.class]);
+    this.setData(entity, this.defaultData);
     return this;
   }
 }

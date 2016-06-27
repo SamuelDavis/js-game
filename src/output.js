@@ -1,8 +1,9 @@
 'use strict';
 
 const {Entity, Sheep} = require('./Entities');
+const {POSITION} = require('./Components');
 const GLYPHS = {
-  [Sheep.constructor.name]: 'S'
+  [Sheep.name]: 'S'
 };
 
 class Output {
@@ -29,12 +30,22 @@ class Output {
    * @param {Entity} entity
    */
   renderEntity(entity) {
-    return render.call(this, drawGlyph.bind(this, this.ctx, entity));
+    return render.call(this, () => {
+      const t = GLYPHS[entity.class] || '?';
+      const {x, y, a} = entity.data[POSITION.class];
+      this.ctx.textBaseline = 'middle';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillStyle = this.COLORS.WHITE;
+      this.ctx.translate(x, y);
+      this.ctx.rotate(a);
+      this.ctx.fillText(t, 0, 0);
+    });
   }
 }
 
 Output.prototype.COLORS = {
-  BLACK: '#000000'
+  BLACK: '#000000',
+  WHITE: '#FFFFFF'
 };
 
 module.exports = Output;
@@ -44,11 +55,4 @@ function render(cb) {
   cb();
   this.ctx.restore();
   return this;
-}
-
-/**
- * @param {CanvasRenderingContext2D} ctx
- * @param {Entity} entity
- */
-function drawGlyph(ctx, entity) {
 }
