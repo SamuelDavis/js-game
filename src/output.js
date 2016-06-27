@@ -39,6 +39,15 @@ class Output {
       this.ctx.translate(x, y);
       this.ctx.rotate(a);
       this.ctx.fillText(t, 0, 0);
+      if (entity instanceof Sheep) {
+        this.ctx.translate(15, -15);
+        this.ctx.rotate(-a);
+        if (entity.wandering.isRunning()) {
+          this.ctx.fillText('*run*', 0, 0)
+        } else {
+          this.ctx.fillText('*pant*', 0, 0)
+        }
+      }
     });
   }
 }
