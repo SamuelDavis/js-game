@@ -1,5 +1,12 @@
 'use strict';
 
+Array.prototype.add = function (val) {
+  return this.includes(val) ? null : this.push(val);
+};
+Array.prototype.remove = function (val) {
+  return this.includes(val) ? this.splice(this.indexOf(val), 1) : null;
+};
+
 const _ = require('lodash/fp');
 const express = require('express');
 const app = express();
@@ -17,5 +24,10 @@ io.on(client.events.connection, socket => client.init(socket, clients, map));
 http.listen(PORT, () => console.log(`listening on *:${PORT}`));
 
 setInterval(() => {
+  utils.forOwn(({data}, id) => {
+    const actor = _.find({id}, map.actors);
+    actor.states = data.states || [];
+  }, clients);
+  map.actors.forEach(actor => actor.update(map));
   io.emit('update', map);
 }, 10);

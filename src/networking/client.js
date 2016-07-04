@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash/fp');
 const utils = require('./../helpers/utils');
 const Actor = require('./../world/actor');
 
@@ -25,10 +26,6 @@ function update(socket, data, map, clients) {
 }
 
 function disconnect(socket, data, map, clients) {
-  utils.forOwn((actor, point, actors) => {
-    if (actor.id === socket.id) {
-      delete actors[point];
-    }
-  }, map.actors);
+  map.actors = _.remove({id: socket.id}, map.actors);
   delete clients[socket.id];
 }

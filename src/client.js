@@ -1,5 +1,12 @@
 'use strict';
 
+Array.prototype.add = function (val) {
+  return this.includes(val) ? null : this.push(val);
+};
+Array.prototype.remove = function (val) {
+  return this.includes(val) ? this.splice(this.indexOf(val), 1) : null;
+};
+
 const _ = require('lodash/fp');
 const utils = require('./helpers/utils');
 const events = require('./networking/client').events;
@@ -8,11 +15,11 @@ const COLORS = {
   WHITE: '#FFFFFF'
 };
 
-Array.prototype.add = function (val) {
-  return this.includes(val) ? null : this.push(val);
-};
-Array.prototype.remove = function (val) {
-  return this.includes(val) ? this.splice(this.indexOf(val), 1) : null;
+const STATES = {
+  WALK_FORWARD: 'KeyW',
+  WALK_BACKWARD: 'KeyS',
+  WALK_LEFT: 'KeyA',
+  WALK_RIGHT: 'KeyD'
 };
 
 class Client {
@@ -24,22 +31,28 @@ class Client {
 
     this.socket.on('update', this.update.bind(this));
 
-    setInterval(() => this.socket.emit(events.update, this.input), 10);
-    setInterval(this.render.bind(this), 500)
+    setInterval(this.report.bind(this), 10);
+    setInterval(this.render.bind(this), 60);
   }
 
   update(data) {
     this.map = data;
   }
 
+  report() {
+    this.socket.emit(events.update, {
+      states: this.input.getStates()
+    });
+  }
+
   render() {
-    const avatarPoint = _.findKey({id: `/#${this.socket.id}`}, this.map.actors) || '0,0';
+    const avatar = _.find({id: `/#${this.socket.id}`}, this.map.actors);
     this.output
       .setMap(this.map)
       .clear()
-      .panTo.apply(this.output, avatarPoint.split(','));
-    utils.forOwn((wall, position) => this.output.renderWall.apply(this.output, position.split(',')), this.map.walls);
-    utils.forOwn((actor, position) => this.output.renderActor.apply(this.output, position.split(',')), this.map.actors);
+      .panTo(avatar.x, avatar.y);
+    utils.forOwn(wall => this.output.renderWall(wall.x, wall.y), this.map.walls);
+    utils.forOwn(actor => this.output.renderActor(actor.x, actor.y), this.map.actors);
   }
 }
 
@@ -55,6 +68,10 @@ class Input {
     document.onkeyup = utils.overrideEvent(e => this.pressed.remove(e.code));
     document.onmousedown = utils.overrideEvent(e => this.pressed.add(mouseButtons[e.which - 1]));
     document.onmouseup = utils.overrideEvent(e => this.pressed.remove(mouseButtons[e.which - 1]));
+  }
+
+  getStates() {
+    return _.map(key => _.findKey(val => val === key, STATES), this.pressed);
   }
 }
 
