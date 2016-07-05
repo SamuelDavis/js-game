@@ -48,17 +48,79 @@ class Actor {
   }
 
   act() {
+    this.stamina++;
     if (this.intent) {
       return this.intent();
     }
-    if (this.stamina >= 10) {
-      return this.startWandering();
-    }
-
-    this.stamina++;
+    return this.pickIntent();
   }
 
-  startWandering() {
+  pickIntent() {
+  }
+
+  getPos() {
+    return _.findKey(actor => actor === this, this._map.actors);
+  }
+
+  getX() {
+    return parseInt(this.getPos().split(',')[0]);
+  }
+
+  getY() {
+    return parseInt(this.getPos().split(',')[1]);
+  }
+
+  moveTo(dest) {
+    const pos = this.getPos();
+    this._map.actors[dest] = this;
+    delete this._map.actors[pos];
+    return this;
+  }
+}
+
+class Player extends Actor {
+  constructor(map, chr) {
+    super(map, chr);
+    this.pressed = [];
+    document.addEventListener('keydown', e => this.pressed.includes(e.code) ? null : this.pressed.push(e.code));
+    document.addEventListener('keyup', e => this.pressed = _.remove(val => val === e.code, this.pressed));
+  }
+
+  pickIntent() {
+    let deltaX = 0;
+    let deltaY = 0;
+    if (this.pressed.includes('KeyW')) {
+      deltaY--;
+    }
+    if (this.pressed.includes('KeyA')) {
+      deltaX--;
+    }
+    if (this.pressed.includes('KeyS')) {
+      deltaY++;
+    }
+    if (this.pressed.includes('KeyD')) {
+      deltaX++;
+    }
+    const deltaStam = Math.abs(deltaX) + Math.abs(deltaY);
+    const dest = `${this.getX() + deltaX},${this.getY() + deltaY}`;
+    if (this.stamina >= deltaStam && this._map.isPassable(dest)) {
+      this.intent = () => {
+        this.moveTo(dest);
+        this.intent = null;
+        this.stamina -= deltaStam;
+        return this;
+      };
+    }
+    return this.intent ? this.intent() : this;
+  }
+}
+
+class Sheep extends Actor {
+  pickIntent() {
+    if (this.stamina < 10) {
+      this.stamina++;
+      return this;
+    }
     const [destX, destY] = _.map(parseInt, this._map.getEmptyPositions().random().split(','));
     const pathfinder = new ROT.Path.AStar(destX, destY, (x, y) => {
       const check = `${x},${y}`;
@@ -80,27 +142,12 @@ class Actor {
         return this;
       }
 
-      const pos = this.getPos();
-      this._map.actors[next] = this;
-      delete this._map.actors[pos];
       this.stamina--;
-      return this;
+      return this.moveTo(next);
     };
 
     return this.intent();
   };
-
-  getPos() {
-    return _.findKey(actor => actor === this, this._map.actors);
-  }
-
-  getX() {
-    return parseInt(this.getPos().split(',')[0]);
-  }
-
-  getY() {
-    return parseInt(this.getPos().split(',')[1]);
-  }
 }
 
 class Display {
@@ -127,11 +174,9 @@ class Map {
       .create((x, y, v) => v ? null : this.tiles[`${x},${y}`] = new Tile(this));
   }
 
-  spawnActor(chr = '@') {
-    // const [x, y] = this.getEmptyPositions().random().split(',');
-    const x = 2;
-    const y = 2;
-    return this.actors[`${x},${y}`] = new Actor(this, chr);
+  spawnActor(actor) {
+    const [x, y] = this.getEmptyPositions().random().split(',');
+    return this.actors[`${x},${y}`] = actor;
   }
 
   getEmptyPositions() {
@@ -149,7 +194,8 @@ const h = 20;
 const display = new Display(w, h);
 const map = new Map(w, h);
 const scheduler = new ROT.Scheduler.Simple();
-scheduler.add(map.spawnActor(), true);
+scheduler.add(map.spawnActor(new Sheep(map, 'S')), true);
+scheduler.add(map.spawnActor(new Player(map, 'P')), true);
 
 setInterval(() => display.render(map), 60);
 setInterval(() => scheduler.next().act(), 100);
