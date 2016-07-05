@@ -9,32 +9,54 @@ class Actor {
     this.x = x || 0;
     this.y = y || 0;
     this.states = [];
+    this.moving = null;
+    this.moveSpeed = 100;
   }
 
   update(map) {
+    if (this.states.includesAny([
+        this.STATES.WALK_FORWARD,
+        this.STATES.WALK_BACKWARD,
+        this.STATES.WALK_LEFT,
+        this.STATES.WALK_RIGHT
+      ])) {
+      if (!this.moving) {
+        // this.moving = setInterval(function () {
+        //   console.log('testing');
+        // }, this.moveSpeed)
+
+      }
+    } else if (this.moving) {
+      // clearTimeout(this.moving);
+      this.moving = null;
+    }
+    return this;
+  }
+
+  move(map) {
     if (this.states.includes(this.STATES.WALK_FORWARD)) {
       this.y--;
-      while (getColliding(map, this).length) {
-        this.y++;
-      }
+      // while (getColliding(map, this).length) {
+      //   this.y++;
+      // }
     }
     if (this.states.includes(this.STATES.WALK_BACKWARD)) {
       this.y++;
-      while (getColliding(map, this).length) {
-        this.y--;
-      }
+      // while (getColliding(map, this).length) {
+      //   this.y--;
+      // }
     }
     if (this.states.includes(this.STATES.WALK_LEFT)) {
       this.x--;
-      while (getColliding(map, this).length) {
-        this.x++;
-      }
+      // while (getColliding(map, this).length) {
+      //   this.x++;
+      // }
     }
     if (this.states.includes(this.STATES.WALK_RIGHT)) {
       this.x++;
-      while (getColliding(map, this).length) {
-        this.x--;
-      }
+      // while (getColliding(map, this).length) {
+      //   this.x--;
+      // }
     }
     return this;
   }
