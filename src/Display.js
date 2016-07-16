@@ -2,6 +2,7 @@
 
 import _ from 'lodash/fp';
 import ROT from 'rot-js';
+import {Loop} from './utils';
 
 let width, height;
 /**
@@ -14,6 +15,10 @@ let tileSet;
  */
 let renderer;
 let cursor = [0, 0];
+/**
+ * @type {Loop}
+ */
+let renderLoop;
 
 function setCursor(x, y) {
   return cursor = [
@@ -29,6 +34,7 @@ export default class Display {
     tileSet = _tileSet;
     renderer = new ROT.Display(_.assign(tileSet, {layout: 'tile', width, height}));
     document.getElementById('screen').appendChild(renderer.getContainer());
+    renderLoop = new Loop(60, this.draw);
   }
 
   setMap(_map) {
@@ -63,10 +69,10 @@ export default class Display {
     ];
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
-        renderer.draw(x, y, getGraphic(map.getTile(x + offset[0], y + offset[1]).type));
+        renderer.draw(x, y, map.getTerrain(x + offset[0], y + offset[1]).gId);
       }
     }
-    renderer.draw(cursor[0] - offset[0], cursor[1] - offset[1], getGraphic(0));
+    renderer.draw(cursor[0] - offset[0], cursor[1] - offset[1], 298);
 
     return this;
   }
@@ -86,15 +92,18 @@ export default class Display {
       .setAttribute('class', 'hidden');
     return this;
   }
-}
 
-function getGraphic(id) {
-  switch (id) {
-    case 0:
-      return 'cursor';
-    default:
-      if ([1, 2, 3, 4].includes(id)) {
-        return `grass${id}`;
-      }
+  isPaused() {
+    return renderLoop.isRunning();
+  }
+
+  pause() {
+    renderLoop.stop();
+    return this;
+  }
+
+  unpause() {
+    renderLoop.start();
+    return this;
   }
 }

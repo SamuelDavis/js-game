@@ -19,7 +19,7 @@ function overrideEvent(cb = (() => false)) {
   return e => {
     e.preventDefault();
     cb(e);
-    return e;
+    return false;
   }
 }
 

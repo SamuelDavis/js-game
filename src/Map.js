@@ -1,17 +1,17 @@
 'use strict';
 
 import _ from 'lodash/fp';
-const data = {};
+const terrain = {};
 let width, height;
 
 class Tile {
-  constructor(type) {
-    this.type = type;
+  constructor(gId) {
+    this.gId = gId;
   }
 }
 
-function setTile(x, y, tile) {
-  data[`${x},${y}`] = tile;
+function setTerrain(x, y, tile) {
+  terrain[`${x},${y}`] = tile;
 }
 
 export default class Map {
@@ -19,8 +19,8 @@ export default class Map {
     width = src.length;
     height = src[0].length;
     src.forEach((row, y) => {
-      row.forEach((type, x) => {
-        setTile(x, y, new Tile(type));
+      row.forEach((gId, x) => {
+        setTerrain(x, y, new Tile(gId));
       });
     });
   }
@@ -33,7 +33,7 @@ export default class Map {
     return height;
   }
 
-  getTile(x, y) {
-    return _.get(`${x},${y}`, data);
+  getTerrain(x, y) {
+    return _.get(`${x},${y}`, terrain);
   }
 }
