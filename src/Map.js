@@ -10,8 +10,8 @@ class Tile {
   }
 }
 
-function setTerrain(x, y, tile) {
-  terrain[`${x},${y}`] = tile;
+function setTile(collection, x, y, tile) {
+  collection[`${x},${y}`] = tile;
 }
 
 export default class Map {
@@ -20,7 +20,7 @@ export default class Map {
     height = src[0].length;
     src.forEach((row, y) => {
       row.forEach((gId, x) => {
-        setTerrain(x, y, new Tile(gId));
+        setTile(terrain, x, y, new Tile(gId));
       });
     });
   }
