@@ -13,12 +13,12 @@ let tileSet;
  * @type {ROT.Display}
  */
 let renderer;
-let offset = [0, 0];
+let cursor = [0, 0];
 
-function setOffset(x, y) {
-  return offset = [
-    _.clamp(0, map.getWidth() - width, x),
-    _.clamp(0, map.getHeight() - height, y)
+function setCursor(x, y) {
+  return cursor = [
+    _.clamp(0, map.getWidth() - 1, x),
+    _.clamp(0, map.getHeight() - 1, y)
   ];
 }
 
@@ -28,7 +28,7 @@ export default class Display {
     height = _height;
     tileSet = _tileSet;
     renderer = new ROT.Display(_.assign(tileSet, {layout: 'tile', width, height}));
-    document.body.appendChild(renderer.getContainer());
+    document.getElementById('screen').appendChild(renderer.getContainer());
   }
 
   setMap(_map) {
@@ -37,38 +37,64 @@ export default class Display {
   }
 
   panUp() {
-    setOffset(offset[0], offset[1] - 1);
+    setCursor(cursor[0], cursor[1] - 1);
     return this;
   }
 
   panRight() {
-    setOffset(offset[0] + 1, offset[1]);
+    setCursor(cursor[0] + 1, cursor[1]);
     return this;
   }
 
   panDown() {
-    setOffset(offset[0], offset[1] + 1);
+    setCursor(cursor[0], cursor[1] + 1);
     return this;
   }
 
   panLeft() {
-    setOffset(offset[0] - 1, offset[1]);
+    setCursor(cursor[0] - 1, cursor[1]);
     return this;
   }
 
   draw() {
+    const offset = [
+      _.clamp(0, map.getWidth() - width, cursor[0] - _.floor(width / 2)),
+      _.clamp(0, map.getHeight() - height, cursor[1] - _.floor(height / 2))
+    ];
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
-        renderer.draw(x, y, getGraphic(map.getTile(x + offset[0], y + offset[1])));
+        renderer.draw(x, y, getGraphic(map.getTile(x + offset[0], y + offset[1]).type));
       }
     }
+    renderer.draw(cursor[0] - offset[0], cursor[1] - offset[1], getGraphic(0));
 
+    return this;
+  }
+
+  showText(text = null) {
+    const textBox = document.getElementById('text');
+    if (text) {
+      textBox.innerText = text;
+    }
+    textBox.setAttribute('class', '');
+    return this;
+  }
+
+  hideText() {
+    document
+      .getElementById('text')
+      .setAttribute('class', 'hidden');
     return this;
   }
 }
 
-function getGraphic(tile) {
-  if ([1, 2, 3, 4].includes(tile.type)) {
-    return `grass${tile.type}`;
+function getGraphic(id) {
+  switch (id) {
+    case 0:
+      return 'cursor';
+    default:
+      if ([1, 2, 3, 4].includes(id)) {
+        return `grass${id}`;
+      }
   }
 }

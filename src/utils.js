@@ -1,5 +1,11 @@
 'use strict';
 
+function keysToVals(obj) {
+  const res = {};
+  forOwn((val, prop) => res[prop] = prop, obj);
+  return res;
+}
+
 function forOwn(cb, obj) {
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
@@ -11,13 +17,13 @@ function forOwn(cb, obj) {
 
 function overrideEvent(cb = (() => false)) {
   return e => {
+    e.preventDefault();
     cb(e);
     return e;
   }
 }
 
 function loopInterval(loop) {
-  console.log('interval');
   const start = new Date().getMilliseconds();
   loop.cb();
   if (loop.running) {
@@ -52,6 +58,7 @@ class Loop {
 }
 
 export {
+  keysToVals,
   forOwn,
   overrideEvent,
   Loop
