@@ -14,69 +14,44 @@ let tileSet;
  * @type {ROT.Display}
  */
 let renderer;
-let cursor = [0, 0];
+/**
+ * @type {Cursor}
+ */
+let cursor;
 /**
  * @type {Loop}
  */
 let renderLoop;
 
-function setCursor(x, y) {
-  return cursor = [
-    _.clamp(0, map.getWidth() - 1, x),
-    _.clamp(0, map.getHeight() - 1, y)
-  ];
-}
-
 export default class Display {
-  constructor(_width, _height, _tileSet) {
+  constructor(_width, _height, _tileSet, _map, _cursor) {
     width = _width;
     height = _height;
     tileSet = _tileSet;
+    map = _map;
+    cursor = _cursor;
     renderer = new ROT.Display(_.assign(tileSet, {layout: 'tile', width, height}));
     document.getElementById('screen').appendChild(renderer.getContainer());
     renderLoop = new Loop(60, this.draw);
   }
 
-  setMap(_map) {
-    map = _map;
-    return this;
-  }
-
-  panUp() {
-    setCursor(cursor[0], cursor[1] - 1);
-    return this;
-  }
-
-  panRight() {
-    setCursor(cursor[0] + 1, cursor[1]);
-    return this;
-  }
-
-  panDown() {
-    setCursor(cursor[0], cursor[1] + 1);
-    return this;
-  }
-
-  panLeft() {
-    setCursor(cursor[0] - 1, cursor[1]);
-    return this;
-  }
-
   draw() {
+    const cursorPos = cursor.getPos();
     const offset = [
-      _.clamp(0, map.getWidth() - width, cursor[0] - _.floor(width / 2)),
-      _.clamp(0, map.getHeight() - height, cursor[1] - _.floor(height / 2))
+      _.clamp(0, map.getWidth() - width, cursorPos[0] - _.floor(width / 2)),
+      _.clamp(0, map.getHeight() - height, cursorPos[1] - _.floor(height / 2))
     ];
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
-        const tiles = [map.getTerrain, map.getUnit]
-          .map(cb => cb.call(map, x + offset[0], y + offset[1]))
+        const tileContent = map
+          .getTile(x + offset[0], y + offset[1])
+          .getContents();
+        renderer.draw(x, y, tileContent.concat(cursor.getSelected() === _.head(tileContent) ? [{gId: 298}] : [])
           .map(tile => tile ? tile.gId : null)
-          .filter(Boolean);
-        renderer.draw(x, y, tiles);
+          .filter(Boolean));
       }
     }
-    renderer.draw(cursor[0] - offset[0], cursor[1] - offset[1], 298);
+    renderer.draw(cursorPos[0] - offset[0], cursorPos[1] - offset[1], 298);
 
     return this;
   }

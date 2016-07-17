@@ -11,15 +11,24 @@ let game;
  * @type {Display}
  */
 let display;
+/**
+ * @type {Map}
+ */
+let map;
+/**
+ * @type {Cursor}
+ */
+let cursor;
 
 const controls = {down: {}, up: {}};
 const keyPos = keysToVals(controls);
 
 const commands = forOwn(([pos, keys, cb]) => keys.forEach(key => controls[pos][key] = cb), {
-  ScrollUp: [keyPos.down, ['ArrowUp', 'KeyW'], () => game.isPaused() ? null : display.panUp()],
-  ScrollRight: [keyPos.down, ['ArrowRight', 'KeyD'], () => game.isPaused() ? null : display.panRight()],
-  ScrollDown: [keyPos.down, ['ArrowDown', 'KeyS'], () => game.isPaused() ? null : display.panDown()],
-  ScrollLeft: [keyPos.down, ['ArrowLeft', 'KeyA'], () => game.isPaused() ? null : display.panLeft()],
+  ScrollUp: [keyPos.down, ['ArrowUp', 'KeyW'], () => game.isPaused() ? null : cursor.panUp()],
+  ScrollRight: [keyPos.down, ['ArrowRight', 'KeyD'], () => game.isPaused() ? null : cursor.panRight()],
+  ScrollDown: [keyPos.down, ['ArrowDown', 'KeyS'], () => game.isPaused() ? null : cursor.panDown()],
+  ScrollLeft: [keyPos.down, ['ArrowLeft', 'KeyA'], () => game.isPaused() ? null : cursor.panLeft()],
+  Select: [keyPos.down, ['KeyJ'], () => cursor.setSelected(map.getTile.apply(map, cursor.getPos()))],
   Pause: [keyPos.down, ['Space'], () => {
     (game.isPaused() ? game.unpause : game.pause).apply(game);
     (display.isPaused() ? display.pause : display.unpause).apply(display);
@@ -36,9 +45,11 @@ const commands = forOwn(([pos, keys, cb]) => keys.forEach(key => controls[pos][k
 });
 
 export default class UI {
-  constructor(_game, _display) {
+  constructor(_game, _display, _map, _cursor) {
     game = _game;
     display = _display;
+    map = _map;
+    cursor = _cursor;
   }
 
   applyKeyBindings() {
