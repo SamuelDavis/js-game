@@ -1,5 +1,3 @@
-'use strict';
-
 import _ from 'lodash/fp';
 import ROT from 'rot-js';
 import {Loop} from './utils';

@@ -1,5 +1,3 @@
-'use strict';
-
 import {keysToVals, forOwn, overrideEvent} from './utils';
 import _ from 'lodash/fp';
 

@@ -1,6 +1,3 @@
-'use strict';
-
-
 let tileSheet, sheetWidth, sheetHeight, tileSize;
 
 export default class TileMap {

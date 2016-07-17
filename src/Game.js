@@ -1,5 +1,3 @@
-'use strict';
-
 let paused = false;
 
 export default class Game {

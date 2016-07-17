@@ -1,5 +1,3 @@
-'use strict';
-
 function keysToVals(obj) {
   const res = {};
   forOwn((val, prop) => res[prop] = prop, obj);

@@ -1,5 +1,3 @@
-'use strict';
-
 import Display from './Display';
 import Map from './Map';
 import UI from './UI';
