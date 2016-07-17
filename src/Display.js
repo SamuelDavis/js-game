@@ -69,7 +69,11 @@ export default class Display {
     ];
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
-        renderer.draw(x, y, map.getTerrain(x + offset[0], y + offset[1]).gId);
+        const tiles = [map.getTerrain, map.getUnit]
+          .map(cb => cb.call(map, x + offset[0], y + offset[1]))
+          .map(tile => tile ? tile.gId : null)
+          .filter(Boolean);
+        renderer.draw(x, y, tiles);
       }
     }
     renderer.draw(cursor[0] - offset[0], cursor[1] - offset[1], 298);

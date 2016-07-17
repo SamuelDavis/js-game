@@ -2,6 +2,7 @@
 
 import _ from 'lodash/fp';
 const terrain = {};
+const units = {};
 let width, height;
 
 class Tile {
@@ -15,12 +16,16 @@ function setTile(collection, x, y, tile) {
 }
 
 export default class Map {
-  constructor(src) {
-    width = src.length;
-    height = src[0].length;
-    src.forEach((row, y) => {
+  constructor(terrainSrc = [], unitsSrc = []) {
+    width = terrainSrc.length;
+    height = terrainSrc[0].length;
+    terrainSrc.forEach((row, y) => {
       row.forEach((gId, x) => {
         setTile(terrain, x, y, new Tile(gId));
+        const unitGId = _.get(`${y}.${x}`, unitsSrc);
+        if (unitGId) {
+          setTile(units, x, y, new Tile(unitGId));
+        }
       });
     });
   }
@@ -35,5 +40,9 @@ export default class Map {
 
   getTerrain(x, y) {
     return _.get(`${x},${y}`, terrain);
+  }
+
+  getUnit(x, y) {
+    return _.get(`${x},${y}`, units);
   }
 }
