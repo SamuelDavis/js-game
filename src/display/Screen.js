@@ -43,6 +43,11 @@ export default class Screen {
     return this;
   }
 
+  setOffset(x, y, angle) {
+    this.offset = {x: x - window.innerWidth / 2, y: y - window.innerHeight / 2, angle};
+    return this;
+  }
+
   /**
    * @returns {HTMLCanvasElement}
    * @private
@@ -71,10 +76,10 @@ export default class Screen {
    */
   static _renderActor(ctx, offset, actor) {
     ctx.save();
-    ctx.translate(actor.x + offset.x, actor.y + offset.y);
-    ctx.rotate(actor.angle + offset.angle);
-    ctx.textAlign = 'middle';
-    ctx.textBaseline = 'center';
+    ctx.translate(actor.x, actor.y);
+    ctx.rotate(actor.angle);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = COLORS.RED;
     ctx.fillText('>', 0, 0);
     ctx.restore();

@@ -23,6 +23,9 @@ const actions = {
     const speed = this.speed;
     this.speed += speed;
     setTimeout(() => this.speed -= speed, this.getRollTime());
+  },
+  turn: function (angle) {
+    this.angle = angle;
   }
 };
 
@@ -67,7 +70,7 @@ export default class Input {
       }
     };
 
-    // document.addEventListener("mousemove", this._mousemove.bind(this), false);
+    document.addEventListener("mousemove", this._mousemove.bind(this), false);
     // document.body.onclick = () => document.body.requestPointerLock();
     document.addEventListener('pointerlockchange', lockChangeAlert, false);
     document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
@@ -78,6 +81,7 @@ export default class Input {
    * @private
    */
   _mousemove(e) {
-    actions.turn(e.movementX * (1 + e.movementY) / 10, this._player);
+    const angle = Math.atan2(this._player.y - e.clientY, this._player.x - e.clientX) - Math.PI;
+    this._player.addAction(actions.turn.bind(this._player, angle));
   }
 }
