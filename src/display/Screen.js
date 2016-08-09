@@ -4,6 +4,7 @@ import {Loop, overrideEvent} from './../utils';
 export default class Screen {
   constructor(map, bufferCount = 2) {
     this._map = map;
+    this.offset = {x: 0, y: 0, angle: 0};
     /**
      * @type {HTMLCanvasElement[]}
      * @private
@@ -59,22 +60,23 @@ export default class Screen {
     ctx.clearRect(0, 0, this._buffer.width, this._buffer.height);
     ctx.fillStyle = COLORS.BLACK;
     ctx.fillRect(0, 0, this._buffer.width, this._buffer.height);
-    this._map.actors.forEach(Screen._renderActor.bind(Screen, ctx));
+    this._map.actors.forEach(Screen._renderActor.bind(Screen, ctx, this.offset));
   }
 
   /**
    * @param {CanvasRenderingContext2D} ctx
-   * @param actor
+   * @param {Object} offset
+   * @param {Player} actor
    * @private
    */
-  static _renderActor(ctx, actor) {
+  static _renderActor(ctx, offset, actor) {
     ctx.save();
-    ctx.translate(...actor.getPos());
-    ctx.rotate(actor.getRot());
+    ctx.translate(actor.x + offset.x, actor.y + offset.y);
+    ctx.rotate(actor.angle + offset.angle);
     ctx.textAlign = 'middle';
     ctx.textBaseline = 'center';
     ctx.fillStyle = COLORS.RED;
-    ctx.fillText('^', 0, 0);
+    ctx.fillText('>', 0, 0);
     ctx.restore();
   }
 }

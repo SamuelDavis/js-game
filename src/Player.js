@@ -1,21 +1,11 @@
 export default class Player {
-  constructor(x = 0, y = 0, rot = 0) {
-    /**
-     * @type {Function[]}
-     * @private
-     */
+  constructor(x = 0, y = 0, angle = 0, speed = 2) {
+    this.x = x;
+    this.y = y;
+    this.angle = angle;
+    this.speed = speed;
+    this.rollTime = 100;
     this._actions = [];
-    /**
-     * @type {number[]}
-     * @private
-     */
-    this._pos = [x, y];
-    /**
-     * @type {number}
-     * @private
-     */
-    this._rot = rot;
-    this.rotSpeed = 0.05;
   }
 
   addAction(action) {
@@ -23,6 +13,10 @@ export default class Player {
       this._actions.push(action);
     }
     return this;
+  }
+
+  getRollTime() {
+    return this.rollTime;
   }
 
   removeAction(action) {
@@ -33,15 +27,7 @@ export default class Player {
     return this;
   }
 
-  getPos() {
-    return this._pos;
-  }
-
-  getRot() {
-    return this._rot;
-  }
-
   update() {
-    this._actions.forEach(action => action(this));
+    this._actions.forEach(action => action.call(this));
   }
 }

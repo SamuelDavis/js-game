@@ -1,20 +1,44 @@
 import {overrideEvent} from './utils';
 
+function move(speed, angle) {
+  this.x += speed * Math.cos(angle);
+  this.y += speed * Math.sin(angle);
+}
 
 const actions = {
-  turn: (direction, target) => {
-    target._rot += direction;
+  moveForward: function () {
+    move.call(this, this.speed, this.angle);
+  },
+  moveRight: function () {
+    move.call(this, this.speed * 0.5, this.angle + Math.PI * 0.5);
+  },
+  moveBackward: function () {
+    move.call(this, this.speed * 0.5, this.angle - Math.PI);
+  },
+  moveLeft: function () {
+    move.call(this, this.speed * 0.5, this.angle - Math.PI * 0.5);
+  },
+  roll: function () {
+    this.removeAction(actions.roll);
+    const speed = this.speed;
+    this.speed += speed;
+    setTimeout(() => this.speed -= speed, this.getRollTime());
   }
 };
 
 const bindings = {
   keydown: [
-    [['KeyA'], player => player.addAction(actions.turnLeft)],
-    [['KeyD'], player => player.addAction(actions.turnRight)],
+    [['KeyD'], player => player.addAction(actions.moveForward)],
+    [['KeyW'], player => player.addAction(actions.moveLeft)],
+    [['KeyA'], player => player.addAction(actions.moveBackward)],
+    [['KeyS'], player => player.addAction(actions.moveRight)],
+    [['Space'], player => player.addAction(actions.roll)],
   ],
   keyup: [
-    [['KeyA'], player => player.removeAction(actions.turnLeft)],
-    [['KeyD'], player => player.removeAction(actions.turnRight)],
+    [['KeyD'], player => player.removeAction(actions.moveForward)],
+    [['KeyW'], player => player.removeAction(actions.moveLeft)],
+    [['KeyA'], player => player.removeAction(actions.moveBackward)],
+    [['KeyS'], player => player.removeAction(actions.moveRight)],
   ],
   onkeydown: {},
   onkeyup: {}
@@ -43,7 +67,8 @@ export default class Input {
       }
     };
 
-    document.body.onclick = () => document.body.requestPointerLock();
+    // document.addEventListener("mousemove", this._mousemove.bind(this), false);
+    // document.body.onclick = () => document.body.requestPointerLock();
     document.addEventListener('pointerlockchange', lockChangeAlert, false);
     document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
   }
@@ -53,7 +78,6 @@ export default class Input {
    * @private
    */
   _mousemove(e) {
-    console.log(e);
-    this._player.addAction(actions.turn.bind(actions.turn, e.movementX));
+    actions.turn(e.movementX * (1 + e.movementY) / 10, this._player);
   }
 }
