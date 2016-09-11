@@ -3,11 +3,28 @@
   "version": "0.1.0",
   "author": "Samuel Davis <samueljakdavis@gmail.com>",
   "scripts": {
-    "watch": "node_modules/.bin/watchify src/main.js -o build/main.js --debug"
+    "build": "node_modules/.bin/browserify src/main.js -o build/main.js -v",
+    "watch": "node_modules/.bin/watchify src/main.js -o build/main.js -v"
   },
   "dependencies": {
     "browserify": "*",
-    "watchify": "*"
+    "lodash": "^4.15.0",
+    "rot-js": "^0.6.2",
+    "watchify": "*",
+    "babel-preset-es2015": "^6.14.0",
+    "babelify": "^7.3.0"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015"
+          ]
+        }
+      ]
+    ]
   },
   "preferGlobal": false,
   "private": true
