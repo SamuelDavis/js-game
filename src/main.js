@@ -9,7 +9,7 @@ ROT.RNG.setSeed(new Date().getMilliseconds());
 
 const input = new Input();
 const player = new Player(input);
-const game = new Game(new Display.Canvas(25, 25), new Map.Arena(25, 25), [
+const game = new Game(new Display(), new Map.Arena(25, 25), [
   new Sheep(Sheep),
   new Sheep(Sheep),
   new Sheep(player)

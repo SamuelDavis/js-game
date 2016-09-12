@@ -10,7 +10,9 @@ export default class Input {
     }
   }
 
-  getInput(cb) {
-    this.inputCb = cb;
+  getNextInput() {
+    return new Promise(resolve => {
+      this.inputCb = resolve;
+    });
   }
 }

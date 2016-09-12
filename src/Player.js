@@ -13,15 +13,17 @@ export default class Player {
       .map((t, i) => `(${i + 1}) "${t}"`)
       .join(', ');
     console.log(`What do you want to do with ${actor.constructor.name}? ${optionsText}?`);
-    return new Promise(resolve => {
-      this.input.getInput(code => {
-        const option = parseInt(code.replace('Digit', '')) - 1;
-        if (options.hasOwnProperty(option)) {
-          console.log(options[option]);
-          resolve();
+    return this.input.getNextInput()
+      .then(key => {
+        switch(key) {
+          case 'Digit1':
+          case 'Digit2':
+          case 'Digit3':
+            const bleat = options[parseInt(key.replace('Digit', '')) - 1];
+            return console.log(`Sheep #${game.actors.indexOf(actor)}: "${bleat}"`);
+          default:
+            return this.takeTurnWith(actor, game);
         }
-        return this.takeTurnWith(actor, game).then(resolve);
       });
-    }).then(this.input.getInput(null));
   }
 }

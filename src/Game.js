@@ -7,6 +7,7 @@ export default class Game {
 
   update() {
     this.display.draw(this.map);
-    return this.actors.reduce((carry, actor) => carry.then(actor.act.bind(actor, this)), Promise.resolve());
+    return this.actors.reduce((carry, actor) => carry.then(actor.act.bind(actor, this)), Promise.resolve())
+      .then(this.update.bind(this));
   }
 }
