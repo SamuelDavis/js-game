@@ -1,3 +1,4 @@
 *
 !.gitignore
 !index.html
+!build/main.js
