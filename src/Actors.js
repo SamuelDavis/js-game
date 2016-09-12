@@ -22,41 +22,33 @@ export class Sheep extends Actor {
     return actions[_.random(0, actions.length - 1)]()
       .then(bleat => {
         return new Promise(resolve => setTimeout(() => {
-          console.log(`Sheep #${game.actors.indexOf(sheep)}: "${bleat}"`);
-          resolve();
+          game.display.write(`Sheep #${game.actors.indexOf(sheep)}: "${bleat}"`).then(resolve);
         }, Math.random() * 1000));
       });
   }
 
   getActions() {
-    return [
-      this.ba.bind(this),
-      this.baa.bind(this),
-      this.baaa.bind(this),
-    ];
+    let actions = [this.blinkStupidly.bind(this)];
+    if (this.energy >= 1) {
+      actions.push(this.eatGrass.bind(this));
+    }
+    for (let i = 1; i * 5 < this.energy; i++) {
+      actions.push(this.bleat.bind(this, i));
+    }
+    return actions;
   }
 
-  ba() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve('Ba!');
-      }, Math.random() * 1000);
-    });
+  blinkStupidly() {
+    return Promise.resolve('Blink.');
   }
 
-  baa() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve('Baa!');
-      }, Math.random() * 1000);
-    });
+  eatGrass() {
+    this.energy++;
+    return Promise.resolve('Munch, munch, munch...');
   }
 
-  baaa() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve('Baaa!');
-      }, Math.random() * 1000);
-    });
+  bleat(multiplier = 1) {
+    this.energy -= multiplier * 5;
+    return Promise.resolve(`B${'a'.repeat(multiplier)}!`);
   }
 }
