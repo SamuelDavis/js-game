@@ -1,10 +1,18 @@
 export default class Game {
   constructor(actors = []) {
     this.actors = actors;
+    this.updateInterval = null;
+  }
+
+  start() {
+    this.updateInterval = setInterval(this.update.bind(this), 100);
+  }
+
+  stop() {
+    clearInterval(this.updateInterval);
   }
 
   update() {
-    return this.actors.reduce((carry, actor) => carry.then(actor.act.bind(actor, this)), Promise.resolve())
-      .then(this.update.bind(this));
+    this.actors.forEach(actor => actor.update(this));
   }
 }
