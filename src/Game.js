@@ -1,12 +1,9 @@
 export default class Game {
-  constructor(display, map, actors = []) {
-    this.display = display;
-    this.map = map;
+  constructor(actors = []) {
     this.actors = actors;
   }
 
   update() {
-    this.display.draw(this.map);
     return this.actors.reduce((carry, actor) => carry.then(actor.act.bind(actor, this)), Promise.resolve())
       .then(this.update.bind(this));
   }
